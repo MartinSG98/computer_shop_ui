@@ -6,6 +6,7 @@ import { ShopContext, type ShopState } from './shop-context'
 export function ShopProvider({ children }: { children: ReactNode }) {
   const [products, setProducts] = useState<Product[]>([])
   const [categories, setCategories] = useState<Category[]>([])
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -31,9 +32,26 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     void reload()
   }, [reload])
 
+  const visibleProducts = useMemo(
+    () =>
+      selectedCategory === null
+        ? products
+        : products.filter((product) => product.category === selectedCategory),
+    [products, selectedCategory],
+  )
+
   const value = useMemo<ShopState>(
-    () => ({ products, categories, loading, error, reload }),
-    [products, categories, loading, error, reload],
+    () => ({
+      products,
+      categories,
+      visibleProducts,
+      selectedCategory,
+      setSelectedCategory,
+      loading,
+      error,
+      reload,
+    }),
+    [products, categories, visibleProducts, selectedCategory, loading, error, reload],
   )
 
   return <ShopContext.Provider value={value}>{children}</ShopContext.Provider>

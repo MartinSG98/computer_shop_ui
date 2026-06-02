@@ -5,7 +5,7 @@ import { ProductCard } from './ProductCard'
 const COLS = { base: 1, sm: 2, lg: 3, xl: 4 }
 
 export function ProductGrid() {
-  const { products, loading } = useShop()
+  const { visibleProducts, selectedCategory, loading } = useShop()
 
   if (loading) {
     return (
@@ -17,17 +17,19 @@ export function ProductGrid() {
     )
   }
 
-  if (products.length === 0) {
+  if (visibleProducts.length === 0) {
     return (
       <Center py="xl">
-        <Text c="dimmed">No products found.</Text>
+        <Text c="dimmed">
+          {selectedCategory ? 'No products in this category.' : 'No products found.'}
+        </Text>
       </Center>
     )
   }
 
   return (
     <SimpleGrid cols={COLS} spacing="lg">
-      {products.map((product) => (
+      {visibleProducts.map((product) => (
         <ProductCard key={product.id} product={product} />
       ))}
     </SimpleGrid>

@@ -4,6 +4,11 @@ import type { Category, Product } from '../api/types'
 export interface ShopState {
   products: Product[]
   categories: Category[]
+  /** Products after applying the selected-category filter. */
+  visibleProducts: Product[]
+  /** Selected category slug, or null for "all products". */
+  selectedCategory: string | null
+  setSelectedCategory: (slug: string | null) => void
   loading: boolean
   error: string | null
   /** Re-fetch categories and products (e.g. for a retry button). */

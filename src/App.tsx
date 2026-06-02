@@ -1,4 +1,4 @@
-import { Alert, AppShell, Box, Burger, Button, Center, Group, Stack, Text, Title } from '@mantine/core'
+import { Alert, AppShell, Burger, Button, Center, Group, Stack, Text, Title } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import { IconDeviceDesktop } from '@tabler/icons-react'
 import { CategoryNav } from './components/CategoryNav'
@@ -8,7 +8,11 @@ import { useShop } from './context/shop-context'
 
 function App() {
   const [opened, { toggle }] = useDisclosure()
-  const { error, reload } = useShop()
+  const { error, reload, categories, selectedCategory, visibleProducts, loading } = useShop()
+
+  const currentTitle = selectedCategory
+    ? (categories.find((c) => c.slug === selectedCategory)?.name ?? 'Products')
+    : 'All products'
 
   return (
     <AppShell
@@ -44,9 +48,17 @@ function App() {
             </Alert>
           </Center>
         ) : (
-          <Box>
+          <Stack gap="md">
+            <Group justify="space-between" align="baseline">
+              <Title order={2}>{currentTitle}</Title>
+              {!loading && (
+                <Text c="dimmed" size="sm">
+                  {visibleProducts.length} {visibleProducts.length === 1 ? 'product' : 'products'}
+                </Text>
+              )}
+            </Group>
             <ProductGrid />
-          </Box>
+          </Stack>
         )}
       </AppShell.Main>
     </AppShell>
