@@ -1,17 +1,36 @@
-import { Button, Container, Group, Stack, Text, Title, useMantineColorScheme } from '@mantine/core'
+import { Alert, Button, Center, Container, Loader, Stack, Text, Title } from '@mantine/core'
+import { useShop } from './context/shop-context'
 
 function App() {
-  const { toggleColorScheme } = useMantineColorScheme()
+  const { products, categories, loading, error, reload } = useShop()
 
   return (
     <Container size="sm" py="xl">
       <Stack>
         <Title order={1}>Computer Shop</Title>
-        <Text c="dimmed">Mantine theme and color scheme are wired up.</Text>
-        <Group>
-          <Button onClick={toggleColorScheme}>Toggle color scheme</Button>
-          <Button variant="light">Secondary</Button>
-        </Group>
+
+        {loading && (
+          <Center py="lg">
+            <Loader />
+          </Center>
+        )}
+
+        {error && (
+          <Alert color="red" title="Could not load the shop">
+            <Stack align="flex-start">
+              <Text>{error}</Text>
+              <Button size="xs" variant="light" onClick={reload}>
+                Retry
+              </Button>
+            </Stack>
+          </Alert>
+        )}
+
+        {!loading && !error && (
+          <Text>
+            Loaded {products.length} products across {categories.length} categories.
+          </Text>
+        )}
       </Stack>
     </Container>
   )
