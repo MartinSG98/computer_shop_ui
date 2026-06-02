@@ -1,38 +1,55 @@
-import { Alert, Button, Center, Container, Loader, Stack, Text, Title } from '@mantine/core'
+import { Alert, AppShell, Box, Burger, Button, Center, Group, Stack, Text, Title } from '@mantine/core'
+import { useDisclosure } from '@mantine/hooks'
+import { IconDeviceDesktop } from '@tabler/icons-react'
+import { CategoryNav } from './components/CategoryNav'
+import { ColorSchemeToggle } from './components/ColorSchemeToggle'
+import { ProductGrid } from './components/ProductGrid'
 import { useShop } from './context/shop-context'
 
 function App() {
-  const { products, categories, loading, error, reload } = useShop()
+  const [opened, { toggle }] = useDisclosure()
+  const { error, reload } = useShop()
 
   return (
-    <Container size="sm" py="xl">
-      <Stack>
-        <Title order={1}>Computer Shop</Title>
+    <AppShell
+      header={{ height: 60 }}
+      navbar={{ width: 260, breakpoint: 'sm', collapsed: { mobile: !opened } }}
+      padding="md"
+    >
+      <AppShell.Header>
+        <Group h="100%" px="md" justify="space-between">
+          <Group gap="sm">
+            <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
+            <IconDeviceDesktop color="var(--mantine-color-indigo-6)" />
+            <Title order={3}>Computer Shop</Title>
+          </Group>
+          <ColorSchemeToggle />
+        </Group>
+      </AppShell.Header>
 
-        {loading && (
-          <Center py="lg">
-            <Loader />
+      <AppShell.Navbar p="md">
+        <CategoryNav />
+      </AppShell.Navbar>
+
+      <AppShell.Main>
+        {error ? (
+          <Center py="xl">
+            <Alert color="red" title="Could not load the shop" maw={440}>
+              <Stack align="flex-start">
+                <Text>{error}</Text>
+                <Button size="xs" variant="light" onClick={reload}>
+                  Retry
+                </Button>
+              </Stack>
+            </Alert>
           </Center>
+        ) : (
+          <Box>
+            <ProductGrid />
+          </Box>
         )}
-
-        {error && (
-          <Alert color="red" title="Could not load the shop">
-            <Stack align="flex-start">
-              <Text>{error}</Text>
-              <Button size="xs" variant="light" onClick={reload}>
-                Retry
-              </Button>
-            </Stack>
-          </Alert>
-        )}
-
-        {!loading && !error && (
-          <Text>
-            Loaded {products.length} products across {categories.length} categories.
-          </Text>
-        )}
-      </Stack>
-    </Container>
+      </AppShell.Main>
+    </AppShell>
   )
 }
 
