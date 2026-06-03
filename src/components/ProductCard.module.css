@@ -1,0 +1,20 @@
+.card {
+  cursor: pointer;
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease,
+    border-color 150ms ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--mantine-shadow-lg);
+  border-color: var(--mantine-color-indigo-5);
+}
+
+/* Keyboard focus mirrors hover for accessibility. */
+.card:focus-visible {
+  outline: none;
+  box-shadow: var(--mantine-shadow-lg);
+  border-color: var(--mantine-color-indigo-5);
+}
