@@ -33,10 +33,12 @@ jobs:
 
       - name: Build
         env:
-          # Baked into the bundle at build time. Set to the deployed API URL
-          # (terraform output api_url).
-          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
-        run: npm run build
+          # Baked into the bundle at build time (terraform output api_url).
+          RAW_API_URL: ${{ vars.VITE_API_BASE_URL }}
+        run: |
+          # Strip stray whitespace/newlines that can sneak into repo variables.
+          export VITE_API_BASE_URL="$(printf '%s' "$RAW_API_URL" | tr -d '[:space:]')"
+          npm run build
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
@@ -46,11 +48,12 @@ jobs:
           role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Sync to S3
-        run: aws s3 sync dist/ "s3://${{ vars.FRONTEND_BUCKET }}/" --delete
-
-      - name: Invalidate CloudFront cache
+      - name: Deploy (sync + invalidate)
+        env:
+          RAW_BUCKET: ${{ vars.FRONTEND_BUCKET }}
+          RAW_DIST: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}
         run: |
-          aws cloudfront create-invalidation \
-            --distribution-id "${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}" \
-            --paths "/*"
+          BUCKET="$(printf '%s' "$RAW_BUCKET" | tr -d '[:space:]')"
+          DIST="$(printf '%s' "$RAW_DIST" | tr -d '[:space:]')"
+          aws s3 sync dist/ "s3://$BUCKET/" --delete
+          aws cloudfront create-invalidation --distribution-id "$DIST" --paths "/*"
