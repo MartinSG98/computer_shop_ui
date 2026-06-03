@@ -82,3 +82,11 @@ export default tseslint.config({
   },
 })
 ```
+
+## Related
+
+Part of the Computer Shop project:
+
+- [computer-shop-backend](https://github.com/MartinSG98/computer-shop-backend) — FastAPI backend API
+- [tf-module-computer_shop](https://github.com/MartinSG98/tf-module-computer_shop) — Terraform infrastructure module
+- [tf-stack-computer_shop](https://github.com/MartinSG98/tf-stack-computer_shop) — Terraform deployment stack
