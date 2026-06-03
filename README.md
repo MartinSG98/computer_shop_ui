@@ -1,6 +1,36 @@
-# React + TypeScript + Vite
+# Computer Shop UI
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite + TypeScript + Mantine frontend for the Computer Shop. Loads the
+assortment and categories from the API on startup, with category filtering.
+
+## Develop
+
+```bash
+npm install
+npm run dev   # API defaults to http://127.0.0.1:8000; override with VITE_API_BASE_URL
+```
+
+## Deploy (CI)
+
+`.github/workflows/deploy.yml` runs on push to `main` (and manual dispatch):
+build → `aws s3 sync` to the frontend bucket → CloudFront invalidation,
+authenticating via GitHub OIDC (no stored keys).
+
+Set these repository **variables** (Settings → Secrets and variables → Actions →
+Variables); values come from `terraform output` in `tf-stack-computer_shop`:
+
+| Variable | Terraform output |
+| --- | --- |
+| `AWS_DEPLOY_ROLE_ARN` | `github_frontend_deploy_role_arn` |
+| `FRONTEND_BUCKET` | `frontend_bucket_name` |
+| `CLOUDFRONT_DISTRIBUTION_ID` | `frontend_distribution_id` |
+| `VITE_API_BASE_URL` | `api_url` |
+
+---
+
+## Vite template notes
+
+This project was scaffolded with Vite. The notes below are from that template.
 
 Currently, two official plugins are available:
 
