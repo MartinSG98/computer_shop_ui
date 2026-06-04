@@ -56,9 +56,17 @@ export function Hero() {
       }}
     >
       <div className={classes.layout}>
-        <Stack gap="xs" maw={520}>
+        <Stack gap="xs" maw={680}>
           <Title order={1} c="white">
-            Build your dream PC
+            Build your dream PC{' '}
+            <span style={{ whiteSpace: 'nowrap' }}>
+              with
+              <img
+                src="/msg_wordmark.png"
+                alt="MSG"
+                style={{ height: '0.9em', verticalAlign: 'middle', marginLeft: '0.25em', position: 'relative', top: '-3px' }}
+              />
+            </span>
           </Title>
           <Text c="gray.2" size="lg">
             Hand-picked components from the brands you trust.
