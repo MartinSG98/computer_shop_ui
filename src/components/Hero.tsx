@@ -62,7 +62,7 @@ export function Hero() {
             <span style={{ whiteSpace: 'nowrap' }}>
               with
               <img
-                src="/msg_wordmark.png"
+                src="/msg_wordmark.webp"
                 alt="MSG"
                 style={{ height: '0.9em', verticalAlign: 'middle', marginLeft: '0.25em', position: 'relative', top: '-3px' }}
               />
