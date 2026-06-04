@@ -35,19 +35,16 @@ export function Cart() {
         ) : (
           <Stack>
             {items.map(({ product, quantity }) => (
-              <Group key={product.id} justify="space-between" wrap="nowrap" align="flex-start">
+              <Group key={product.id} justify="space-between" wrap="nowrap" align="center">
                 <Group gap="sm" wrap="nowrap" style={{ flex: 1, minWidth: 0 }}>
                   {product.image_url && (
                     <Image src={product.image_url} alt={product.name} w={48} h={48} fit="contain" />
                   )}
-                  <Stack gap={2} style={{ minWidth: 0 }}>
+                  <Stack gap={4} style={{ minWidth: 0 }}>
                     <Text size="sm" fw={600} lineClamp={1}>
                       {product.name}
                     </Text>
-                    <Text size="xs" c="dimmed">
-                      {formatPrice(product.price, product.currency)}
-                    </Text>
-                    <Group gap={4} mt={4}>
+                    <Group gap={4}>
                       <ActionIcon
                         size="sm"
                         variant="default"
@@ -70,14 +67,19 @@ export function Cart() {
                     </Group>
                   </Stack>
                 </Group>
-                <ActionIcon
-                  variant="subtle"
-                  color="red"
-                  aria-label={`Remove ${product.name}`}
-                  onClick={() => removeItem(product.id)}
-                >
-                  <IconTrash size={16} />
-                </ActionIcon>
+                <Group gap="xs" wrap="nowrap" align="center">
+                  <Text fw={700} c="indigo">
+                    {formatPrice((Number(product.price) * quantity).toFixed(2), product.currency)}
+                  </Text>
+                  <ActionIcon
+                    variant="subtle"
+                    color="red"
+                    aria-label={`Remove ${product.name}`}
+                    onClick={() => removeItem(product.id)}
+                  >
+                    <IconTrash size={16} />
+                  </ActionIcon>
+                </Group>
               </Group>
             ))}
 
