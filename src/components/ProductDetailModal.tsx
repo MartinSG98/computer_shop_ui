@@ -1,6 +1,7 @@
 import { Badge, Button, Center, Divider, Group, Image, Modal, Stack, Table, Text } from '@mantine/core'
 import { IconPhoto, IconShoppingCart } from '@tabler/icons-react'
 import type { Product } from '../api/types'
+import { useCart } from '../context/cart-context'
 import { formatPrice } from '../lib/format'
 
 interface Props {
@@ -12,6 +13,7 @@ interface Props {
 export function ProductDetailModal({ product, opened, onClose }: Props) {
   const inStock = product.stock > 0
   const specs = Object.entries(product.specs)
+  const { addItem } = useCart()
 
   return (
     <Modal opened={opened} onClose={onClose} title={product.name} size="lg" centered>
@@ -60,6 +62,10 @@ export function ProductDetailModal({ product, opened, onClose }: Props) {
           mt="sm"
           leftSection={<IconShoppingCart size={16} />}
           disabled={!inStock}
+          onClick={() => {
+            addItem(product)
+            onClose()
+          }}
         >
           Add to cart
         </Button>
