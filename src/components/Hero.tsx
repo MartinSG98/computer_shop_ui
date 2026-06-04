@@ -56,23 +56,31 @@ export function Hero() {
       }}
     >
       <div className={classes.layout}>
-        <Stack gap="xs" maw={520}>
+        <Stack gap="xs" maw={680}>
           <Title order={1} c="white">
-            Build your dream PC
+            Build your dream PC{' '}
+            <span style={{ whiteSpace: 'nowrap' }}>
+              with
+              <img
+                src="/msg_wordmark.png"
+                alt="MSG"
+                style={{ height: '0.9em', verticalAlign: 'middle', marginLeft: '0.25em', position: 'relative', top: '-3px' }}
+              />
+            </span>
           </Title>
           <Text c="gray.2" size="lg">
-            Hand-picked components from the brands you trust.
+            Your PC. Our Mission.
           </Text>
         </Stack>
 
         {current && (
-          <Stack gap="md" align="center">
+          <Stack gap="md" align="center" w="100%" maw={440} miw={0}>
             <Text size="sm" fw={700} tt="uppercase" lts={1.5} c="gray.3">
               Featured products
             </Text>
 
-            <UnstyledButton onClick={open} aria-label={`View ${current.name}`}>
-              <Paper key={current.id} className={classes.slide} w={440} p="lg" radius="md" bg="white">
+            <UnstyledButton onClick={open} aria-label={`View ${current.name}`} w="100%">
+              <Paper key={current.id} className={classes.slide} w="100%" p="lg" radius="md" bg="white">
                 <Group wrap="nowrap" gap="lg" align="center">
                   {current.image_url ? (
                     <Image src={current.image_url} alt={current.name} w={120} h={120} fit="contain" />

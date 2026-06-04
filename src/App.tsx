@@ -1,4 +1,5 @@
 import {
+  ActionIcon,
   Alert,
   AppShell,
   Box,
@@ -6,6 +7,7 @@ import {
   Center,
   Collapse,
   Group,
+  Image,
   MultiSelect,
   Select,
   Stack,
@@ -13,7 +15,8 @@ import {
   TextInput,
   Title,
 } from '@mantine/core'
-import { IconSearch } from '@tabler/icons-react'
+import { useDisclosure } from '@mantine/hooks'
+import { IconSearch, IconX } from '@tabler/icons-react'
 import { Cart } from './components/Cart'
 import { CategoryButtons } from './components/CategoryButtons'
 import { ColorSchemeToggle } from './components/ColorSchemeToggle'
@@ -41,6 +44,8 @@ function App() {
     loading,
   } = useShop()
 
+  const [mobileSearchOpen, { toggle: toggleMobileSearch }] = useDisclosure(false)
+
   const currentTitle = selectedCategory
     ? (categories.find((c) => c.slug === selectedCategory)?.name ?? 'Products')
     : 'All products'
@@ -53,6 +58,7 @@ function App() {
       <AppShell.Header>
         <Group h="100%" px="md" gap="md" wrap="nowrap">
           <Group style={{ flex: 1 }} gap="sm" wrap="nowrap">
+            <Image src="/msg_logo.png" alt="MSG" h={52} w="auto" fit="contain" />
             <Stack gap={0}>
               <Text
                 fw={800}
@@ -80,6 +86,15 @@ function App() {
           />
 
           <Group style={{ flex: 1 }} justify="flex-end" gap="sm" wrap="nowrap">
+            <ActionIcon
+              hiddenFrom="sm"
+              variant="default"
+              size="lg"
+              aria-label={mobileSearchOpen ? 'Close search' : 'Search'}
+              onClick={toggleMobileSearch}
+            >
+              {mobileSearchOpen ? <IconX size={18} /> : <IconSearch size={18} />}
+            </ActionIcon>
             <Cart />
             <ColorSchemeToggle />
           </Group>
@@ -87,6 +102,21 @@ function App() {
       </AppShell.Header>
 
       <AppShell.Main>
+        <Box hiddenFrom="sm">
+          <Collapse expanded={mobileSearchOpen}>
+            <Box px="md" py="sm">
+              <TextInput
+                placeholder="Search products..."
+                leftSection={<IconSearch size={16} />}
+                radius="xl"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.currentTarget.value)}
+                autoFocus
+              />
+            </Box>
+          </Collapse>
+        </Box>
+
         {error ? (
           <Center py="xl" px="md">
             <Alert color="red" title="Could not load the shop" maw={440}>
