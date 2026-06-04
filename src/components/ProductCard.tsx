@@ -1,4 +1,4 @@
-import { Badge, Box, Button, Card, Center, Group, Image, Stack, Text } from '@mantine/core'
+import { Badge, Button, Card, Center, Image, Stack, Text } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import { IconPhoto, IconShoppingCart } from '@tabler/icons-react'
 import type { Product } from '../api/types'
@@ -15,11 +15,11 @@ export function ProductCard({ product }: { product: Product }) {
   return (
     <>
       <Card
+        className={classes.card}
         shadow="sm"
-        padding="lg"
         radius="md"
         withBorder
-        className={classes.card}
+        padding={0}
         role="button"
         tabIndex={0}
         aria-label={`View details for ${product.name}`}
@@ -31,48 +31,57 @@ export function ProductCard({ product }: { product: Product }) {
           }
         }}
       >
-        <Card.Section>
+        <Card.Section className={classes.media} pos="relative">
           {product.image_url ? (
-            <Image src={product.image_url} alt={product.name} height={180} fit="contain" />
+            <Image
+              src={product.image_url}
+              alt={product.name}
+              h={180}
+              fit="contain"
+              p="md"
+              className={classes.image}
+            />
           ) : (
-            <Center h={180} bg="var(--mantine-color-default-hover)">
-              <IconPhoto size={48} color="var(--mantine-color-dimmed)" />
+            <Center h={180}>
+              <IconPhoto size={48} color="var(--mantine-color-gray-5)" />
             </Center>
           )}
+          <Badge
+            pos="absolute"
+            top={10}
+            right={10}
+            radius="sm"
+            color={inStock ? 'teal' : 'red'}
+            variant={inStock ? 'light' : 'filled'}
+          >
+            {inStock ? 'In stock' : 'Out of stock'}
+          </Badge>
         </Card.Section>
 
-        <Stack gap="xs" mt="md">
-          <Text fw={600} lineClamp={1}>
-            {product.name}
-          </Text>
-          <Text size="sm" c="dimmed">
+        <Stack gap={4} p="md">
+          <Text size="xs" c="dimmed" tt="uppercase" fw={700} lts={0.5} lineClamp={1}>
             {product.brand}
           </Text>
-
-          <Group justify="space-between" mt="xs">
-            <Text fw={700} size="lg" c="indigo">
-              {formatPrice(product.price, product.currency)}
-            </Text>
-            <Badge color={inStock ? 'teal' : 'red'} variant="light">
-              {inStock ? 'In stock' : 'Out of stock'}
-            </Badge>
-          </Group>
-
-          <Box mt="sm">
-            <Button
-              fullWidth
-              variant="light"
-              leftSection={<IconShoppingCart size={16} />}
-              disabled={!inStock}
-              onClick={(event) => {
-                // Don't let the cart button open the details modal.
-                event.stopPropagation()
-                addItem(product)
-              }}
-            >
-              Add to cart
-            </Button>
-          </Box>
+          <Text fw={600} lineClamp={2} className={classes.name}>
+            {product.name}
+          </Text>
+          <Text fw={800} fz="xl" c="violet.4" mt={4}>
+            {formatPrice(product.price, product.currency)}
+          </Text>
+          <Button
+            fullWidth
+            mt="sm"
+            variant="light"
+            leftSection={<IconShoppingCart size={16} />}
+            disabled={!inStock}
+            onClick={(event) => {
+              // Don't let the cart button open the details modal.
+              event.stopPropagation()
+              addItem(product)
+            }}
+          >
+            Add to cart
+          </Button>
         </Stack>
       </Card>
 
