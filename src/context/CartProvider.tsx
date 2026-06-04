@@ -1,9 +1,16 @@
-import { useCallback, useMemo, useState, type ReactNode } from 'react'
+import { useCallback, useMemo, type ReactNode } from 'react'
+import { useLocalStorage } from '@mantine/hooks'
 import type { Product } from '../api/types'
 import { CartContext, type CartItem, type CartState } from './cart-context'
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>([])
+  // Persist across reloads (and sync between tabs). Read synchronously so the
+  // cart badge doesn't flash empty on first paint.
+  const [items, setItems] = useLocalStorage<CartItem[]>({
+    key: 'msg-cart',
+    defaultValue: [],
+    getInitialValueInEffect: false,
+  })
 
   const addItem = useCallback((product: Product) => {
     setItems((current) => {
