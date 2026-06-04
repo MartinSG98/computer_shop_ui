@@ -68,7 +68,7 @@ export function Cart() {
                   </Stack>
                 </Group>
                 <Group gap="xs" wrap="nowrap" align="center">
-                  <Text fw={700} c="indigo">
+                  <Text fw={600} c="dimmed">
                     {formatPrice((Number(product.price) * quantity).toFixed(2), product.currency)}
                   </Text>
                   <ActionIcon
@@ -86,7 +86,7 @@ export function Cart() {
             <Divider />
             <Group justify="space-between">
               <Text fw={600}>Total</Text>
-              <Text fw={700} size="lg" c="indigo">
+              <Text fw={700} size="xl">
                 {formatPrice(totalPrice.toFixed(2), currency)}
               </Text>
             </Group>
