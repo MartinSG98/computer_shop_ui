@@ -10,7 +10,7 @@ import { CartProvider } from './context/CartProvider.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <MantineProvider theme={theme} defaultColorScheme="auto">
+    <MantineProvider theme={theme} defaultColorScheme="dark">
       <ShopProvider>
         <CartProvider>
           <App />
