@@ -11,6 +11,11 @@ export interface ShopState {
   /** Selected category slug, or null for "all products". */
   selectedCategory: string | null
   setSelectedCategory: (slug: string | null) => void
+  /** Distinct brands in the current category (for the brand filter). */
+  availableBrands: string[]
+  /** Selected brands; empty means all brands. */
+  selectedBrands: string[]
+  setSelectedBrands: (brands: string[]) => void
   /** Price sort order; defaults to lowest first. */
   sortOrder: SortOrder
   setSortOrder: (order: SortOrder) => void

@@ -1,7 +1,8 @@
 # Computer Shop UI
 
 React + Vite + TypeScript + Mantine frontend for the Computer Shop. Loads the
-assortment and categories from the API on startup, with category filtering.
+assortment and categories from the API on startup, with category and per-category
+brand filtering, price sorting, and a product detail modal.
 
 ## Develop
 

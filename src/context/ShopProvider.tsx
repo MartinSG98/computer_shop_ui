@@ -7,6 +7,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
   const [products, setProducts] = useState<Product[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [selectedBrands, setSelectedBrands] = useState<string[]>([])
   const [sortOrder, setSortOrder] = useState<SortOrder>('price-asc')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -33,15 +34,34 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     void reload()
   }, [reload])
 
-  const visibleProducts = useMemo(() => {
-    const filtered =
+  // Changing category clears the brand filter (brands differ per category).
+  const selectCategory = useCallback((slug: string | null) => {
+    setSelectedCategory(slug)
+    setSelectedBrands([])
+  }, [])
+
+  const categoryProducts = useMemo(
+    () =>
       selectedCategory === null
         ? products
-        : products.filter((product) => product.category === selectedCategory)
+        : products.filter((product) => product.category === selectedCategory),
+    [products, selectedCategory],
+  )
+
+  const availableBrands = useMemo(
+    () => Array.from(new Set(categoryProducts.map((product) => product.brand))).sort(),
+    [categoryProducts],
+  )
+
+  const visibleProducts = useMemo(() => {
+    const byBrand =
+      selectedBrands.length === 0
+        ? categoryProducts
+        : categoryProducts.filter((product) => selectedBrands.includes(product.brand))
     // price is a Decimal string from the API; compare numerically for sorting only.
-    const sorted = [...filtered].sort((a, b) => Number(a.price) - Number(b.price))
+    const sorted = [...byBrand].sort((a, b) => Number(a.price) - Number(b.price))
     return sortOrder === 'price-desc' ? sorted.reverse() : sorted
-  }, [products, selectedCategory, sortOrder])
+  }, [categoryProducts, selectedBrands, sortOrder])
 
   const value = useMemo<ShopState>(
     () => ({
@@ -49,14 +69,29 @@ export function ShopProvider({ children }: { children: ReactNode }) {
       categories,
       visibleProducts,
       selectedCategory,
-      setSelectedCategory,
+      setSelectedCategory: selectCategory,
+      availableBrands,
+      selectedBrands,
+      setSelectedBrands,
       sortOrder,
       setSortOrder,
       loading,
       error,
       reload,
     }),
-    [products, categories, visibleProducts, selectedCategory, sortOrder, loading, error, reload],
+    [
+      products,
+      categories,
+      visibleProducts,
+      selectedCategory,
+      selectCategory,
+      availableBrands,
+      selectedBrands,
+      sortOrder,
+      loading,
+      error,
+      reload,
+    ],
   )
 
   return <ShopContext.Provider value={value}>{children}</ShopContext.Provider>
