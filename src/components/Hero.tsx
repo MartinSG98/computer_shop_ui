@@ -69,7 +69,7 @@ export function Hero() {
             </span>
           </Title>
           <Text c="gray.2" size="lg">
-            Hand-picked components from the brands you trust.
+            Your PC. Our Mission.
           </Text>
         </Stack>
 
