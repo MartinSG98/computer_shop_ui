@@ -1,6 +1,35 @@
 import { Checkbox, NavLink, Stack, Text } from '@mantine/core'
-import { IconLayoutGrid } from '@tabler/icons-react'
+import {
+  IconBolt,
+  IconCpu,
+  IconCpu2,
+  IconDatabase,
+  IconDeviceDesktop,
+  IconDeviceGamepad,
+  IconDeviceSdCard,
+  IconDevices2,
+  IconHeadphones,
+  IconKeyboard,
+  IconLayoutGrid,
+  IconMouse,
+  IconTemperature,
+} from '@tabler/icons-react'
 import { useShop } from '../context/shop-context'
+
+const CATEGORY_ICONS: Record<string, typeof IconCpu> = {
+  processors: IconCpu,
+  'cpu-coolers': IconTemperature,
+  motherboards: IconCpu2,
+  memory: IconDeviceSdCard,
+  'graphics-cards': IconDeviceGamepad,
+  storage: IconDatabase,
+  'power-supplies': IconBolt,
+  cases: IconDevices2,
+  monitors: IconDeviceDesktop,
+  keyboards: IconKeyboard,
+  mice: IconMouse,
+  headsets: IconHeadphones,
+}
 
 export function CategoryNav() {
   const { categories, selectedCategory, setSelectedCategory, availableBrands, selectedBrands, setSelectedBrands } =
@@ -22,16 +51,20 @@ export function CategoryNav() {
         label="All products"
         leftSection={<IconLayoutGrid size={18} />}
         active={selectedCategory === null}
+        variant="light"
         onClick={() => setSelectedCategory(null)}
       />
 
       {categories.map((category) => {
         const active = selectedCategory === category.slug
+        const Icon = CATEGORY_ICONS[category.slug]
         return (
           <div key={category.slug}>
             <NavLink
               label={category.name}
+              leftSection={Icon ? <Icon size={18} /> : undefined}
               active={active}
+              variant="light"
               onClick={() => setSelectedCategory(category.slug)}
             />
             {/* Only the selected category expands, and only if it has >1 brand. */}
