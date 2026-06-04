@@ -1,6 +1,7 @@
 import { Alert, AppShell, Burger, Button, Center, Group, Select, Stack, Text, Title } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import { IconDeviceDesktop } from '@tabler/icons-react'
+import { Cart } from './components/Cart'
 import { CategoryNav } from './components/CategoryNav'
 import { ColorSchemeToggle } from './components/ColorSchemeToggle'
 import { ProductGrid } from './components/ProductGrid'
@@ -29,7 +30,10 @@ function App() {
             <IconDeviceDesktop color="var(--mantine-color-indigo-6)" />
             <Title order={3}>Computer Shop</Title>
           </Group>
-          <ColorSchemeToggle />
+          <Group gap="sm">
+            <Cart />
+            <ColorSchemeToggle />
+          </Group>
         </Group>
       </AppShell.Header>
 

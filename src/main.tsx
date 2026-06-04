@@ -6,12 +6,15 @@ import './index.css'
 import App from './App.tsx'
 import { theme } from './theme.ts'
 import { ShopProvider } from './context/ShopProvider.tsx'
+import { CartProvider } from './context/CartProvider.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <MantineProvider theme={theme} defaultColorScheme="auto">
       <ShopProvider>
-        <App />
+        <CartProvider>
+          <App />
+        </CartProvider>
       </ShopProvider>
     </MantineProvider>
   </StrictMode>,

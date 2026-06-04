@@ -2,6 +2,7 @@ import { Badge, Box, Button, Card, Center, Group, Image, Stack, Text } from '@ma
 import { useDisclosure } from '@mantine/hooks'
 import { IconPhoto, IconShoppingCart } from '@tabler/icons-react'
 import type { Product } from '../api/types'
+import { useCart } from '../context/cart-context'
 import { formatPrice } from '../lib/format'
 import { ProductDetailModal } from './ProductDetailModal'
 import classes from './ProductCard.module.css'
@@ -9,6 +10,7 @@ import classes from './ProductCard.module.css'
 export function ProductCard({ product }: { product: Product }) {
   const inStock = product.stock > 0
   const [opened, { open, close }] = useDisclosure(false)
+  const { addItem } = useCart()
 
   return (
     <>
@@ -62,8 +64,11 @@ export function ProductCard({ product }: { product: Product }) {
               variant="light"
               leftSection={<IconShoppingCart size={16} />}
               disabled={!inStock}
-              // Don't let the cart button open the details modal.
-              onClick={(event) => event.stopPropagation()}
+              onClick={(event) => {
+                // Don't let the cart button open the details modal.
+                event.stopPropagation()
+                addItem(product)
+              }}
             >
               Add to cart
             </Button>
