@@ -4,6 +4,7 @@ import {
   Box,
   Button,
   Center,
+  Collapse,
   Group,
   MultiSelect,
   Select,
@@ -99,7 +100,9 @@ function App() {
           </Center>
         ) : (
           <>
-            {showHero && <Hero />}
+            <Collapse expanded={showHero} transitionDuration={300}>
+              <Hero />
+            </Collapse>
 
             {/* Full-width tab strip attached to the hero edge. */}
             <CategoryButtons />
