@@ -1,6 +1,18 @@
-import { Alert, AppShell, Burger, Button, Center, Group, Select, Stack, Text, Title } from '@mantine/core'
+import {
+  Alert,
+  AppShell,
+  Burger,
+  Button,
+  Center,
+  Group,
+  Select,
+  Stack,
+  Text,
+  TextInput,
+  Title,
+} from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
-import { IconDeviceDesktop } from '@tabler/icons-react'
+import { IconSearch } from '@tabler/icons-react'
 import { Cart } from './components/Cart'
 import { CategoryNav } from './components/CategoryNav'
 import { ColorSchemeToggle } from './components/ColorSchemeToggle'
@@ -10,8 +22,18 @@ import type { SortOrder } from './context/shop-context'
 
 function App() {
   const [opened, { toggle }] = useDisclosure()
-  const { error, reload, categories, selectedCategory, visibleProducts, sortOrder, setSortOrder, loading } =
-    useShop()
+  const {
+    error,
+    reload,
+    categories,
+    selectedCategory,
+    visibleProducts,
+    searchQuery,
+    setSearchQuery,
+    sortOrder,
+    setSortOrder,
+    loading,
+  } = useShop()
 
   const currentTitle = selectedCategory
     ? (categories.find((c) => c.slug === selectedCategory)?.name ?? 'Products')
@@ -19,18 +41,44 @@ function App() {
 
   return (
     <AppShell
-      header={{ height: 60 }}
+      header={{ height: 64 }}
       navbar={{ width: 260, breakpoint: 'sm', collapsed: { mobile: !opened } }}
       padding="md"
     >
       <AppShell.Header>
-        <Group h="100%" px="md" justify="space-between">
-          <Group gap="sm">
+        <Group h="100%" px="md" gap="md" wrap="nowrap">
+          {/* Left: brand */}
+          <Group style={{ flex: 1 }} gap="sm" wrap="nowrap">
             <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-            <IconDeviceDesktop color="var(--mantine-color-indigo-6)" />
-            <Title order={3}>Computer Shop</Title>
+            <Stack gap={0}>
+              <Text
+                fw={800}
+                fz="lg"
+                lh={1.1}
+                variant="gradient"
+                gradient={{ from: 'violet', to: 'grape', deg: 135 }}
+              >
+                MSG Computers
+              </Text>
+              <Text fz={10} fw={600} c="dimmed" tt="uppercase" lts={1} lh={1}>
+                PC parts &amp; builds
+              </Text>
+            </Stack>
           </Group>
-          <Group gap="sm">
+
+          {/* Center: search (equal-flex sides keep it centered) */}
+          <TextInput
+            placeholder="Search products..."
+            leftSection={<IconSearch size={16} />}
+            radius="xl"
+            visibleFrom="sm"
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.currentTarget.value)}
+            style={{ flex: 1, maxWidth: 460 }}
+          />
+
+          {/* Right: actions */}
+          <Group style={{ flex: 1 }} justify="flex-end" gap="sm" wrap="nowrap">
             <Cart />
             <ColorSchemeToggle />
           </Group>

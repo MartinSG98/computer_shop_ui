@@ -8,6 +8,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
   const [categories, setCategories] = useState<Category[]>([])
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [selectedBrands, setSelectedBrands] = useState<string[]>([])
+  const [searchQuery, setSearchQuery] = useState('')
   const [sortOrder, setSortOrder] = useState<SortOrder>('price-asc')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -58,10 +59,19 @@ export function ShopProvider({ children }: { children: ReactNode }) {
       selectedBrands.length === 0
         ? categoryProducts
         : categoryProducts.filter((product) => selectedBrands.includes(product.brand))
+    const query = searchQuery.trim().toLowerCase()
+    const bySearch =
+      query === ''
+        ? byBrand
+        : byBrand.filter(
+            (product) =>
+              product.name.toLowerCase().includes(query) ||
+              product.brand.toLowerCase().includes(query),
+          )
     // price is a Decimal string from the API; compare numerically for sorting only.
-    const sorted = [...byBrand].sort((a, b) => Number(a.price) - Number(b.price))
+    const sorted = [...bySearch].sort((a, b) => Number(a.price) - Number(b.price))
     return sortOrder === 'price-desc' ? sorted.reverse() : sorted
-  }, [categoryProducts, selectedBrands, sortOrder])
+  }, [categoryProducts, selectedBrands, searchQuery, sortOrder])
 
   const value = useMemo<ShopState>(
     () => ({
@@ -73,6 +83,8 @@ export function ShopProvider({ children }: { children: ReactNode }) {
       availableBrands,
       selectedBrands,
       setSelectedBrands,
+      searchQuery,
+      setSearchQuery,
       sortOrder,
       setSortOrder,
       loading,
@@ -87,6 +99,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
       selectCategory,
       availableBrands,
       selectedBrands,
+      searchQuery,
       sortOrder,
       loading,
       error,

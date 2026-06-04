@@ -16,6 +16,9 @@ export interface ShopState {
   /** Selected brands; empty means all brands. */
   selectedBrands: string[]
   setSelectedBrands: (brands: string[]) => void
+  /** Free-text search over the current view (matches name or brand). */
+  searchQuery: string
+  setSearchQuery: (query: string) => void
   /** Price sort order; defaults to lowest first. */
   sortOrder: SortOrder
   setSortOrder: (order: SortOrder) => void
