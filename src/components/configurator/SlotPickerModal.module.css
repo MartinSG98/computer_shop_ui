@@ -1,0 +1,13 @@
+.row {
+  width: 100%;
+  border-radius: var(--mantine-radius-md);
+  transition: background-color 120ms ease;
+}
+
+.row:hover:not(:disabled) {
+  background-color: var(--mantine-color-default-hover);
+}
+
+.row:disabled {
+  cursor: not-allowed;
+}
