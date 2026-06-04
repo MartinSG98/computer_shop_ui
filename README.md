@@ -25,7 +25,7 @@ Variables); values come from `terraform output` in `tf-stack-computer_shop`:
 | `AWS_DEPLOY_ROLE_ARN` | `github_frontend_deploy_role_arn` |
 | `FRONTEND_BUCKET` | `frontend_bucket_name` |
 | `CLOUDFRONT_DISTRIBUTION_ID` | `frontend_distribution_id` |
-| `VITE_API_BASE_URL` | `api_url` |
+| `VITE_API_BASE_URL` | `api_custom_domain_url` if a custom API domain is set, else `api_url` |
 
 ---
 

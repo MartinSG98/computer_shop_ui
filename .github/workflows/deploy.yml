@@ -3,6 +3,9 @@ name: Deploy frontend
 on:
   push:
     branches: [main]
+    # Skip deploys for docs-only changes (nothing in the bundle changes).
+    paths-ignore:
+      - "**/*.md"
   workflow_dispatch:
 
 # OIDC: assume the frontend deploy role keylessly. No AWS access keys stored.
