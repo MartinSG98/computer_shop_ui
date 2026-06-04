@@ -1,0 +1,4 @@
+.input::placeholder {
+  color: var(--mantine-color-text);
+  opacity: 1;
+}
