@@ -58,7 +58,7 @@ function App() {
       <AppShell.Header>
         <Group h="100%" px="md" gap="md" wrap="nowrap">
           <Group style={{ flex: 1 }} gap="sm" wrap="nowrap">
-            <Image src="/msg_logo.png" alt="MSG" h={52} w="auto" fit="contain" />
+            <Image src="/msg_logo.webp" alt="MSG" h={52} w="auto" fit="contain" />
             <Stack gap={0}>
               <Text
                 fw={800}
