@@ -1,6 +1,6 @@
 import { ActionIcon, AppShell, Box, Button, Collapse, Group, Image, Stack, Text, TextInput } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
-import { IconSearch, IconTools, IconX } from '@tabler/icons-react'
+import { IconArrowLeft, IconSearch, IconTools, IconX } from '@tabler/icons-react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import { Cart } from './Cart'
 import { ColorSchemeToggle } from './ColorSchemeToggle'
@@ -65,7 +65,17 @@ export function Layout() {
                 {mobileSearchOpen ? <IconX size={18} /> : <IconSearch size={18} />}
               </ActionIcon>
             )}
-            {!onBuild && (
+            {onBuild ? (
+              <Button
+                component={Link}
+                to="/"
+                variant="gradient"
+                gradient={{ from: 'violet', to: 'grape', deg: 135 }}
+                leftSection={<IconArrowLeft size={18} />}
+              >
+                Back to shop
+              </Button>
+            ) : (
               <Button
                 component={Link}
                 to="/build"
