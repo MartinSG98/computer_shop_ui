@@ -1,6 +1,6 @@
 import { ActionIcon, AppShell, Box, Button, Collapse, Group, Image, Stack, Text, TextInput } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
-import { IconCpu, IconSearch, IconX } from '@tabler/icons-react'
+import { IconSearch, IconTools, IconX } from '@tabler/icons-react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import { Cart } from './Cart'
 import { ColorSchemeToggle } from './ColorSchemeToggle'
@@ -71,7 +71,7 @@ export function Layout() {
                 to="/build"
                 variant="gradient"
                 gradient={{ from: 'violet', to: 'grape', deg: 135 }}
-                leftSection={<IconCpu size={18} />}
+                leftSection={<IconTools size={18} />}
               >
                 Build a PC
               </Button>
