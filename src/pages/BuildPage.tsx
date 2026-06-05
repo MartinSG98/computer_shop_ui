@@ -149,7 +149,7 @@ export function BuildPage() {
         </div>
 
         <Grid gap="lg">
-          <Grid.Col span={{ base: 12, md: 8 }}>
+          <Grid.Col span={{ base: 12, md: 5 }}>
             <Stack gap="sm">
               {BUILD_SLOTS.map(({ slug, label }) => {
                 const product = selection[slug]
@@ -233,6 +233,9 @@ export function BuildPage() {
               })}
             </Stack>
           </Grid.Col>
+
+          {/* Reserved empty space between the build list and the summary. */}
+          <Grid.Col span={{ base: 12, md: 3 }} visibleFrom="md" />
 
           <Grid.Col span={{ base: 12, md: 4 }}>
             <Paper withBorder radius="md" p="lg" pos="sticky" top={80}>
