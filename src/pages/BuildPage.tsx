@@ -6,6 +6,7 @@ import {
   Divider,
   Grid,
   Group,
+  Modal,
   Paper,
   Stack,
   Text,
@@ -30,6 +31,7 @@ import {
 } from '@tabler/icons-react'
 import type { Product } from '../api/types'
 import { useShop } from '../context/shop-context'
+import { useCart } from '../context/cart-context'
 import { formatPrice } from '../lib/format'
 import {
   BUILD_SLOTS,
@@ -55,8 +57,11 @@ const SLOT_ICONS: Record<BuildSlug, typeof IconCpu> = {
 
 export function BuildPage() {
   const { products } = useShop()
+  const { addItem } = useCart()
   const [selection, setSelection] = useState<BuildSelection>({})
   const [activeSlot, setActiveSlot] = useState<BuildSlug | null>(null)
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [justAdded, setJustAdded] = useState(false)
 
   const total = buildTotal(selection)
   const watts = estimatedWattage(selection)
@@ -75,14 +80,34 @@ export function BuildPage() {
     if (!activeSlot) return
     setSelection((current) => ({ ...current, [activeSlot]: product }))
     setActiveSlot(null)
+    setJustAdded(false)
   }
 
-  const clear = (slug: BuildSlug) =>
+  const clear = (slug: BuildSlug) => {
     setSelection((current) => {
       const next = { ...current }
       delete next[slug]
       return next
     })
+    setJustAdded(false)
+  }
+
+  const addBuild = () => {
+    Object.values(selection).forEach((product) => {
+      if (product) addItem(product)
+    })
+    setConfirmOpen(false)
+    setJustAdded(true)
+  }
+
+  // Hard errors trigger a confirm step; otherwise add straight to the cart.
+  const handleAddToCart = () => {
+    if (errors.length > 0) {
+      setConfirmOpen(true)
+      return
+    }
+    addBuild()
+  }
 
   return (
     <Box px="md" py="lg">
@@ -254,12 +279,24 @@ export function BuildPage() {
                   </Text>
                 )}
 
-                <Button fullWidth mt="xs" leftSection={<IconShoppingCart size={18} />} disabled>
+                <Button
+                  fullWidth
+                  mt="xs"
+                  leftSection={<IconShoppingCart size={18} />}
+                  disabled={filled === 0}
+                  onClick={handleAddToCart}
+                >
                   Add build to cart
                 </Button>
-                <Text size="xs" c="dimmed" ta="center">
-                  Checkout coming next.
-                </Text>
+                {justAdded ? (
+                  <Text size="xs" c="teal" ta="center">
+                    Added to your cart.
+                  </Text>
+                ) : (
+                  <Text size="xs" c="dimmed" ta="center">
+                    Adds every selected part to your cart.
+                  </Text>
+                )}
               </Stack>
             </Paper>
           </Grid.Col>
@@ -273,6 +310,50 @@ export function BuildPage() {
         onSelect={select}
         onClose={() => setActiveSlot(null)}
       />
+
+      <Modal
+        opened={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        title="This build has compatibility problems"
+        centered
+      >
+        <Stack gap="md">
+          <Text size="sm">These parts may not work together:</Text>
+          <Stack gap={8}>
+            {errors.map((issue, i) => (
+              <Group key={`ce${i}`} gap={8} wrap="nowrap" align="flex-start">
+                <IconAlertTriangle
+                  size={16}
+                  color="var(--mantine-color-red-6)"
+                  style={{ flexShrink: 0, marginTop: 2 }}
+                />
+                <Text size="sm">{issue.message}</Text>
+              </Group>
+            ))}
+            {warnings.map((issue, i) => (
+              <Group key={`cw${i}`} gap={8} wrap="nowrap" align="flex-start">
+                <IconAlertCircle
+                  size={16}
+                  color="var(--mantine-color-yellow-6)"
+                  style={{ flexShrink: 0, marginTop: 2 }}
+                />
+                <Text size="sm">{issue.message}</Text>
+              </Group>
+            ))}
+          </Stack>
+          <Text size="sm" c="dimmed">
+            You can still add these parts to your cart if you know what you're doing.
+          </Text>
+          <Group justify="flex-end" gap="sm">
+            <Button variant="default" onClick={() => setConfirmOpen(false)}>
+              Cancel
+            </Button>
+            <Button color="red" onClick={addBuild}>
+              Add anyway
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
     </Box>
   )
 }
