@@ -10,6 +10,7 @@ import {
   Select,
   Stack,
   Text,
+  Tooltip,
   UnstyledButton,
 } from '@mantine/core'
 import { IconPhoto } from '@tabler/icons-react'
@@ -95,13 +96,40 @@ export function SlotPickerModal({ opened, label, products, onSelect, onClose }: 
           {visible.map((product) => {
             const inStock = product.stock > 0
             return (
-              <UnstyledButton
+              <Tooltip
                 key={product.id}
-                className={classes.row}
-                disabled={!inStock}
-                onClick={() => onSelect(product)}
+                multiline
+                w={300}
+                withArrow
+                position="left"
+                openDelay={200}
+                label={
+                  <Stack gap={4}>
+                    {product.description && (
+                      <Text size="xs" c="dimmed">
+                        {product.description}
+                      </Text>
+                    )}
+                    <Stack gap={2}>
+                      {Object.entries(product.specs).map(([key, value]) => (
+                        <Text key={key} size="xs">
+                          <Text span fw={600} tt="capitalize">
+                            {key.replace(/_/g, ' ')}
+                          </Text>
+                          : {value}
+                        </Text>
+                      ))}
+                    </Stack>
+                  </Stack>
+                }
               >
-                <Group wrap="nowrap" gap="md" p="xs" style={{ opacity: inStock ? 1 : 0.5 }}>
+                <UnstyledButton
+                  className={classes.row}
+                  aria-disabled={!inStock}
+                  onClick={() => inStock && onSelect(product)}
+                  style={{ cursor: inStock ? 'pointer' : 'not-allowed' }}
+                >
+                  <Group wrap="nowrap" gap="md" p="xs" style={{ opacity: inStock ? 1 : 0.5 }}>
                   {product.image_url ? (
                     <Image src={product.image_url} alt={product.name} w={48} h={48} fit="contain" />
                   ) : (
@@ -126,9 +154,10 @@ export function SlotPickerModal({ opened, label, products, onSelect, onClose }: 
                         Out of stock
                       </Badge>
                     )}
-                  </Stack>
-                </Group>
-              </UnstyledButton>
+                    </Stack>
+                  </Group>
+                </UnstyledButton>
+              </Tooltip>
             )
           })}
         </Stack>
