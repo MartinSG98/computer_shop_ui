@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   ActionIcon,
   Box,
@@ -11,9 +11,13 @@ import {
   Text,
   ThemeIcon,
   Title,
+  Tooltip,
 } from '@mantine/core'
 import {
+  IconAlertCircle,
+  IconAlertTriangle,
   IconBolt,
+  IconCircleCheck,
   IconCpu,
   IconCpu2,
   IconDatabase,
@@ -36,6 +40,7 @@ import {
   type BuildSlug,
 } from '../lib/configurator'
 import { SlotPickerModal } from '../components/configurator/SlotPickerModal'
+import { evaluateBuild, issuesBySlot, severityBySlot } from '../lib/compatibility'
 
 const SLOT_ICONS: Record<BuildSlug, typeof IconCpu> = {
   processors: IconCpu,
@@ -56,6 +61,12 @@ export function BuildPage() {
   const total = buildTotal(selection)
   const watts = estimatedWattage(selection)
   const filled = filledCount(selection)
+
+  const issues = useMemo(() => evaluateBuild(selection), [selection])
+  const slotSeverity = useMemo(() => severityBySlot(issues), [issues])
+  const slotIssues = useMemo(() => issuesBySlot(issues), [issues])
+  const errors = issues.filter((i) => i.severity === 'error')
+  const warnings = issues.filter((i) => i.severity === 'warning')
 
   const activeLabel = BUILD_SLOTS.find((s) => s.slug === activeSlot)?.label ?? ''
   const activeProducts = activeSlot ? products.filter((p) => p.category === activeSlot) : []
@@ -87,17 +98,60 @@ export function BuildPage() {
               {BUILD_SLOTS.map(({ slug, label }) => {
                 const product = selection[slug]
                 const Icon = SLOT_ICONS[slug]
+                const sev = slotSeverity[slug]
                 return (
-                  <Paper key={slug} withBorder radius="md" p="md">
+                  <Paper
+                    key={slug}
+                    withBorder
+                    radius="md"
+                    p="md"
+                    style={
+                      sev
+                        ? { borderColor: sev === 'error' ? 'var(--mantine-color-red-5)' : 'var(--mantine-color-yellow-5)' }
+                        : undefined
+                    }
+                  >
                     <Group justify="space-between" wrap="nowrap" gap="md">
                       <Group gap="md" wrap="nowrap" style={{ minWidth: 0 }}>
                         <ThemeIcon variant="light" size={42} radius="md">
                           <Icon size={22} />
                         </ThemeIcon>
                         <div style={{ minWidth: 0 }}>
-                          <Text size="xs" c="dimmed" tt="uppercase" fw={700} lts={0.5}>
-                            {label}
-                          </Text>
+                          <Group gap={6} wrap="nowrap">
+                            <Text size="xs" c="dimmed" tt="uppercase" fw={700} lts={0.5}>
+                              {label}
+                            </Text>
+                            {sev && (
+                              <Tooltip
+                                multiline
+                                w={260}
+                                withArrow
+                                label={
+                                  <Stack gap={4}>
+                                    {(slotIssues[slug] ?? []).map((issue, i) => (
+                                      <Text key={i} size="xs">
+                                        {issue.message}
+                                      </Text>
+                                    ))}
+                                  </Stack>
+                                }
+                              >
+                                {sev === 'error' ? (
+                                  <IconAlertTriangle
+                                    size={14}
+                                    color="var(--mantine-color-red-6)"
+                                    style={{ cursor: 'help' }}
+                                  />
+                                ) : (
+                                  <IconAlertCircle
+                                    size={14}
+                                    color="var(--mantine-color-yellow-6)"
+                                    style={{ cursor: 'help' }}
+                                  />
+                                )}
+                              </Tooltip>
+                            )}
+                          </Group>
                           {product ? (
                             <Text fw={600} lineClamp={1}>
                               {product.name}
@@ -159,11 +213,52 @@ export function BuildPage() {
                     {formatPrice(total.toFixed(2), 'USD')}
                   </Text>
                 </Group>
+
+                {(errors.length > 0 || warnings.length > 0) && (
+                  <Stack gap={6}>
+                    {errors.map((issue, i) => (
+                      <Group key={`e${i}`} gap={8} wrap="nowrap" align="flex-start">
+                        <IconAlertTriangle
+                          size={16}
+                          color="var(--mantine-color-red-6)"
+                          style={{ flexShrink: 0, marginTop: 2 }}
+                        />
+                        <Text size="xs">{issue.message}</Text>
+                      </Group>
+                    ))}
+                    {warnings.map((issue, i) => (
+                      <Group key={`w${i}`} gap={8} wrap="nowrap" align="flex-start">
+                        <IconAlertCircle
+                          size={16}
+                          color="var(--mantine-color-yellow-6)"
+                          style={{ flexShrink: 0, marginTop: 2 }}
+                        />
+                        <Text size="xs">{issue.message}</Text>
+                      </Group>
+                    ))}
+                  </Stack>
+                )}
+
+                {issues.length === 0 && filled === BUILD_SLOTS.length && (
+                  <Group gap={8} wrap="nowrap" align="flex-start">
+                    <IconCircleCheck size={18} color="var(--mantine-color-teal-6)" style={{ flexShrink: 0 }} />
+                    <Text size="sm" c="teal">
+                      Everything's compatible. Your build is ready to order.
+                    </Text>
+                  </Group>
+                )}
+
+                {issues.length === 0 && filled > 0 && filled < BUILD_SLOTS.length && (
+                  <Text size="xs" c="dimmed">
+                    No conflicts so far ({filled}/{BUILD_SLOTS.length} parts selected).
+                  </Text>
+                )}
+
                 <Button fullWidth mt="xs" leftSection={<IconShoppingCart size={18} />} disabled>
                   Add build to cart
                 </Button>
                 <Text size="xs" c="dimmed" ta="center">
-                  Compatibility checks and checkout coming next.
+                  Checkout coming next.
                 </Text>
               </Stack>
             </Paper>
