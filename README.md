@@ -1,8 +1,20 @@
 # Computer Shop UI
 
-React + Vite + TypeScript + Mantine frontend for the Computer Shop. Loads the
-assortment and categories from the API on startup, with category and per-category
-brand filtering, price sorting, and a product detail modal.
+React + Vite + TypeScript + Mantine frontend for the Computer Shop. It uses
+react-router for two pages:
+
+- **Shop** (`/`): loads the assortment and categories from the API on startup,
+  with category and per-category brand filtering, price sorting, a product
+  detail modal, and a cart that persists in localStorage.
+- **PC builder** (`/build`): pick a part for each of the 8 build slots from a
+  filterable picker (brand, price, specs on hover), with a running total and
+  estimated power draw. A compatibility engine flags errors and warnings (socket,
+  RAM, clearances, PSU wattage, and so on) inline and in the summary, plus blue
+  balance tips for overkill and bottlenecks. The finished build adds to the cart,
+  and is saved in localStorage so it survives navigation and reload.
+
+Compatibility and tips are driven by typed `attributes` and a `tier` on each
+build-category product, served by the API.
 
 ## Develop
 
