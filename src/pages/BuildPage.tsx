@@ -144,7 +144,15 @@ export function BuildPage() {
     <Box px="md" py="lg">
       <Stack gap="lg">
         <div>
-          <Title order={2}>Build a PC</Title>
+          <Title order={2}>
+            Welcome to the{' '}
+            <img
+              src="/msg_wordmark.webp"
+              alt="MSG"
+              style={{ height: '0.9em', verticalAlign: 'middle', position: 'relative', top: '-2px' }}
+            />{' '}
+            builder where your ideas become reality
+          </Title>
           <Text c="dimmed">Pick a part for each slot. We'll total it up and estimate the power draw.</Text>
         </div>
 
