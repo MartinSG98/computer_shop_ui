@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useLocalStorage } from '@mantine/hooks'
 import {
   ActionIcon,
   Box,
@@ -58,10 +59,27 @@ const SLOT_ICONS: Record<BuildSlug, typeof IconCpu> = {
 export function BuildPage() {
   const { products } = useShop()
   const { addItem } = useCart()
-  const [selection, setSelection] = useState<BuildSelection>({})
+  // Persist the build as product ids; rehydrate against the live catalog so it
+  // survives navigation/reload without ever holding stale prices.
+  const [selectedIds, setSelectedIds] = useLocalStorage<Partial<Record<BuildSlug, string>>>({
+    key: 'msg-build',
+    defaultValue: {},
+    getInitialValueInEffect: false,
+  })
   const [activeSlot, setActiveSlot] = useState<BuildSlug | null>(null)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [justAdded, setJustAdded] = useState(false)
+
+  const productById = useMemo(() => new Map(products.map((p) => [p.id, p])), [products])
+  const selection: BuildSelection = useMemo(() => {
+    const result: BuildSelection = {}
+    for (const { slug } of BUILD_SLOTS) {
+      const id = selectedIds[slug]
+      const product = id ? productById.get(id) : undefined
+      if (product) result[slug] = product
+    }
+    return result
+  }, [selectedIds, productById])
 
   const total = buildTotal(selection)
   const watts = estimatedWattage(selection)
@@ -78,13 +96,13 @@ export function BuildPage() {
 
   const select = (product: Product) => {
     if (!activeSlot) return
-    setSelection((current) => ({ ...current, [activeSlot]: product }))
+    setSelectedIds((current) => ({ ...current, [activeSlot]: product.id }))
     setActiveSlot(null)
     setJustAdded(false)
   }
 
   const clear = (slug: BuildSlug) => {
-    setSelection((current) => {
+    setSelectedIds((current) => {
       const next = { ...current }
       delete next[slug]
       return next
