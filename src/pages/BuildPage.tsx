@@ -26,6 +26,7 @@ import {
   IconDeviceGamepad,
   IconDeviceSdCard,
   IconDevices2,
+  IconInfoCircle,
   IconShoppingCart,
   IconTemperature,
   IconX,
@@ -43,7 +44,7 @@ import {
   type BuildSlug,
 } from '../lib/configurator'
 import { SlotPickerModal } from '../components/configurator/SlotPickerModal'
-import { evaluateBuild, issuesBySlot, severityBySlot } from '../lib/compatibility'
+import { evaluateBuild, issuesBySlot, severityBySlot, type IssueSeverity } from '../lib/compatibility'
 
 const SLOT_ICONS: Record<BuildSlug, typeof IconCpu> = {
   processors: IconCpu,
@@ -54,6 +55,17 @@ const SLOT_ICONS: Record<BuildSlug, typeof IconCpu> = {
   storage: IconDatabase,
   'power-supplies': IconBolt,
   cases: IconDevices2,
+}
+
+const SEV_BORDER: Record<IssueSeverity, string> = {
+  error: 'var(--mantine-color-red-5)',
+  warning: 'var(--mantine-color-yellow-5)',
+  tip: 'var(--mantine-color-blue-5)',
+}
+const SEV_ICON_COLOR: Record<IssueSeverity, string> = {
+  error: 'var(--mantine-color-red-6)',
+  warning: 'var(--mantine-color-yellow-6)',
+  tip: 'var(--mantine-color-blue-6)',
 }
 
 export function BuildPage() {
@@ -90,6 +102,7 @@ export function BuildPage() {
   const slotIssues = useMemo(() => issuesBySlot(issues), [issues])
   const errors = issues.filter((i) => i.severity === 'error')
   const warnings = issues.filter((i) => i.severity === 'warning')
+  const tips = issues.filter((i) => i.severity === 'tip')
 
   const activeLabel = BUILD_SLOTS.find((s) => s.slug === activeSlot)?.label ?? ''
   const activeProducts = activeSlot ? products.filter((p) => p.category === activeSlot) : []
@@ -148,11 +161,7 @@ export function BuildPage() {
                     withBorder
                     radius="md"
                     p="md"
-                    style={
-                      sev
-                        ? { borderColor: sev === 'error' ? 'var(--mantine-color-red-5)' : 'var(--mantine-color-yellow-5)' }
-                        : undefined
-                    }
+                    style={sev ? { borderColor: SEV_BORDER[sev] } : undefined}
                   >
                     <Group justify="space-between" wrap="nowrap" gap="md">
                       <Group gap="md" wrap="nowrap" style={{ minWidth: 0 }}>
@@ -180,17 +189,11 @@ export function BuildPage() {
                                 }
                               >
                                 {sev === 'error' ? (
-                                  <IconAlertTriangle
-                                    size={14}
-                                    color="var(--mantine-color-red-6)"
-                                    style={{ cursor: 'help' }}
-                                  />
+                                  <IconAlertTriangle size={14} color={SEV_ICON_COLOR.error} style={{ cursor: 'help' }} />
+                                ) : sev === 'warning' ? (
+                                  <IconAlertCircle size={14} color={SEV_ICON_COLOR.warning} style={{ cursor: 'help' }} />
                                 ) : (
-                                  <IconAlertCircle
-                                    size={14}
-                                    color="var(--mantine-color-yellow-6)"
-                                    style={{ cursor: 'help' }}
-                                  />
+                                  <IconInfoCircle size={14} color={SEV_ICON_COLOR.tip} style={{ cursor: 'help' }} />
                                 )}
                               </Tooltip>
                             )}
@@ -257,7 +260,7 @@ export function BuildPage() {
                   </Text>
                 </Group>
 
-                {(errors.length > 0 || warnings.length > 0) && (
+                {issues.length > 0 && (
                   <Stack gap={6}>
                     {errors.map((issue, i) => (
                       <Group key={`e${i}`} gap={8} wrap="nowrap" align="flex-start">
@@ -273,7 +276,17 @@ export function BuildPage() {
                       <Group key={`w${i}`} gap={8} wrap="nowrap" align="flex-start">
                         <IconAlertCircle
                           size={16}
-                          color="var(--mantine-color-yellow-6)"
+                          color={SEV_ICON_COLOR.warning}
+                          style={{ flexShrink: 0, marginTop: 2 }}
+                        />
+                        <Text size="xs">{issue.message}</Text>
+                      </Group>
+                    ))}
+                    {tips.map((issue, i) => (
+                      <Group key={`t${i}`} gap={8} wrap="nowrap" align="flex-start">
+                        <IconInfoCircle
+                          size={16}
+                          color={SEV_ICON_COLOR.tip}
                           style={{ flexShrink: 0, marginTop: 2 }}
                         />
                         <Text size="xs">{issue.message}</Text>
@@ -282,7 +295,7 @@ export function BuildPage() {
                   </Stack>
                 )}
 
-                {issues.length === 0 && filled === BUILD_SLOTS.length && (
+                {errors.length === 0 && warnings.length === 0 && filled === BUILD_SLOTS.length && (
                   <Group gap={8} wrap="nowrap" align="flex-start">
                     <IconCircleCheck size={18} color="var(--mantine-color-teal-6)" style={{ flexShrink: 0 }} />
                     <Text size="sm" c="teal">
@@ -291,7 +304,7 @@ export function BuildPage() {
                   </Group>
                 )}
 
-                {issues.length === 0 && filled > 0 && filled < BUILD_SLOTS.length && (
+                {errors.length === 0 && warnings.length === 0 && filled > 0 && filled < BUILD_SLOTS.length && (
                   <Text size="xs" c="dimmed">
                     No conflicts so far ({filled}/{BUILD_SLOTS.length} parts selected).
                   </Text>

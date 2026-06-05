@@ -32,6 +32,8 @@ export interface CompatAttributes {
   max_cooler_height_mm?: number
   max_radiator_mm?: number
   psu_form_factors?: string[]
+  /** Relative tier (1 entry to 4 flagship) on CPUs, GPUs and motherboards. */
+  tier?: number
 }
 
 export interface Product {

@@ -1,7 +1,7 @@
 import type { BuildSelection, BuildSlug } from './configurator'
 import { estimatedWattage } from './configurator'
 
-export type IssueSeverity = 'error' | 'warning'
+export type IssueSeverity = 'error' | 'warning' | 'tip'
 
 export interface Issue {
   severity: IssueSeverity
@@ -12,6 +12,12 @@ export interface Issue {
 
 /** Recommended PSU headroom over the estimated draw (20%). */
 const PSU_HEADROOM = 0.2
+/** A PSU more than this multiple of the estimated draw is flagged as overkill. */
+const PSU_OVERKILL_FACTOR = 2
+/** A gap of this many tiers between parts is flagged as an imbalance. */
+const TIER_GAP = 2
+/** A cooler rated this many times the CPU's TDP is flagged as overkill. */
+const COOLER_OVERKILL_FACTOR = 2.5
 
 /**
  * Run every pairwise compatibility rule over the current selection and return
@@ -152,8 +158,41 @@ export function evaluateBuild(selection: BuildSelection): Issue[] {
           message: `${psuA.wattage_w}W is tight for a ~${draw}W draw. We recommend 20-30% headroom for power spikes.`,
           slots: ['power-supplies'],
         })
+      } else if (psuA.wattage_w > draw * PSU_OVERKILL_FACTOR) {
+        issues.push({
+          severity: 'tip',
+          message: `This ${psuA.wattage_w}W PSU is much larger than the ~${draw}W this build needs. A smaller one would save money.`,
+          slots: ['power-supplies'],
+        })
       }
     }
+  }
+
+  // Motherboard much higher tier than the CPU (overkill board)
+  if (moboA?.tier != null && cpuA?.tier != null && moboA.tier - cpuA.tier >= TIER_GAP) {
+    issues.push({
+      severity: 'tip',
+      message: `This motherboard is high-end for this CPU. A cheaper board would pair just as well.`,
+      slots: ['motherboards', 'processors'],
+    })
+  }
+
+  // GPU much higher tier than the CPU (CPU may bottleneck it)
+  if (gpuA?.tier != null && cpuA?.tier != null && gpuA.tier - cpuA.tier >= TIER_GAP) {
+    issues.push({
+      severity: 'tip',
+      message: `This CPU may hold back the ${gpu?.name} at lower resolutions.`,
+      slots: ['processors', 'graphics-cards'],
+    })
+  }
+
+  // Cooler rated far above what the CPU needs (overkill cooler)
+  if (coolerA?.tdp_rating_w != null && cpuA?.tdp_w != null && coolerA.tdp_rating_w >= cpuA.tdp_w * COOLER_OVERKILL_FACTOR) {
+    issues.push({
+      severity: 'tip',
+      message: `This cooler is more capable than this ~${cpuA.tdp_w}W CPU needs.`,
+      slots: ['cpu-coolers', 'processors'],
+    })
   }
 
   // CPU with no integrated graphics and no discrete GPU
@@ -168,12 +207,15 @@ export function evaluateBuild(selection: BuildSelection): Issue[] {
   return issues
 }
 
-/** Map each slot to its worst severity, for inline highlighting (error beats warning). */
+const SEVERITY_RANK: Record<IssueSeverity, number> = { error: 3, warning: 2, tip: 1 }
+
+/** Map each slot to its worst severity, for inline highlighting (error > warning > tip). */
 export function severityBySlot(issues: Issue[]): Partial<Record<BuildSlug, IssueSeverity>> {
   const map: Partial<Record<BuildSlug, IssueSeverity>> = {}
   for (const issue of issues) {
     for (const slot of issue.slots) {
-      if (issue.severity === 'error' || map[slot] !== 'error') {
+      const current = map[slot]
+      if (!current || SEVERITY_RANK[issue.severity] > SEVERITY_RANK[current]) {
         map[slot] = issue.severity
       }
     }
