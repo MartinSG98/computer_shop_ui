@@ -17,6 +17,9 @@ export function ShopPage() {
     availableBrands,
     selectedBrands,
     setSelectedBrands,
+    attributeControls,
+    attributeFilters,
+    setAttributeFilter,
     searchQuery,
     sortOrder,
     setSortOrder,
@@ -77,6 +80,20 @@ export function ShopPage() {
                   clearable
                 />
               )}
+              {attributeControls.map((control) => (
+                <MultiSelect
+                  key={control.key}
+                  size="xs"
+                  w={190}
+                  classNames={{ inputField: brandSelectClasses.input }}
+                  placeholder={(attributeFilters[control.key]?.length ?? 0) ? undefined : control.placeholder}
+                  aria-label={`Filter by ${control.label.toLowerCase()}`}
+                  data={control.options}
+                  value={attributeFilters[control.key] ?? []}
+                  onChange={(values) => setAttributeFilter(control.key, values)}
+                  clearable
+                />
+              ))}
               <Select
                 size="xs"
                 w={180}

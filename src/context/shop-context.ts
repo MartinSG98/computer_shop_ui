@@ -3,6 +3,14 @@ import type { Category, Product } from '../api/types'
 
 export type SortOrder = 'price-asc' | 'price-desc'
 
+/** An attribute filter plus the options currently available for it. */
+export interface AttributeControl {
+  key: string
+  label: string
+  placeholder: string
+  options: string[]
+}
+
 export interface ShopState {
   products: Product[]
   categories: Category[]
@@ -16,6 +24,11 @@ export interface ShopState {
   /** Selected brands; empty means all brands. */
   selectedBrands: string[]
   setSelectedBrands: (brands: string[]) => void
+  /** Attribute filters for the current category, each with its available options. */
+  attributeControls: AttributeControl[]
+  /** Selected values per attribute-filter key; empty/missing means all. */
+  attributeFilters: Record<string, string[]>
+  setAttributeFilter: (key: string, values: string[]) => void
   /** Free-text search over the current view (matches name or brand). */
   searchQuery: string
   setSearchQuery: (query: string) => void

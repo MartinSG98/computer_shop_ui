@@ -16,6 +16,7 @@ import {
 import { IconPhoto } from '@tabler/icons-react'
 import type { Product } from '../../api/types'
 import { formatPrice } from '../../lib/format'
+import { filterOptions, filtersForCategory, matchesAttributeFilters } from '../../lib/filters'
 import brandSelectClasses from '../BrandSelect.module.css'
 import classes from './SlotPickerModal.module.css'
 
@@ -24,19 +25,23 @@ type SortOrder = 'price-asc' | 'price-desc'
 interface Props {
   opened: boolean
   label: string
+  /** Category slug of the slot being picked; drives the attribute filters. */
+  categorySlug: string | null
   products: Product[]
   onSelect: (product: Product) => void
   onClose: () => void
 }
 
-export function SlotPickerModal({ opened, label, products, onSelect, onClose }: Props) {
+export function SlotPickerModal({ opened, label, categorySlug, products, onSelect, onClose }: Props) {
   const [sortOrder, setSortOrder] = useState<SortOrder>('price-asc')
   const [selectedBrands, setSelectedBrands] = useState<string[]>([])
+  const [attributeFilters, setAttributeFilters] = useState<Record<string, string[]>>({})
 
   // Reset the filters whenever the picker switches to a different slot.
   useEffect(() => {
     setSortOrder('price-asc')
     setSelectedBrands([])
+    setAttributeFilters({})
   }, [label])
 
   const availableBrands = useMemo(
@@ -45,14 +50,31 @@ export function SlotPickerModal({ opened, label, products, onSelect, onClose }: 
   )
   const showBrandFilter = availableBrands.length > 1
 
+  const categoryFilters = useMemo(() => filtersForCategory(categorySlug), [categorySlug])
+  const attributeControls = useMemo(
+    () =>
+      categoryFilters
+        .map((filter) => ({
+          key: filter.key,
+          label: filter.label,
+          placeholder: filter.placeholder,
+          options: filterOptions(filter, products),
+        }))
+        .filter((control) => control.options.length > 1),
+    [categoryFilters, products],
+  )
+
   const visible = useMemo(() => {
     const byBrand =
       selectedBrands.length === 0
         ? products
         : products.filter((p) => selectedBrands.includes(p.brand))
-    const sorted = [...byBrand].sort((a, b) => Number(a.price) - Number(b.price))
+    const byAttributes = byBrand.filter((p) =>
+      matchesAttributeFilters(p, categoryFilters, attributeFilters),
+    )
+    const sorted = [...byAttributes].sort((a, b) => Number(a.price) - Number(b.price))
     return sortOrder === 'price-desc' ? sorted.reverse() : sorted
-  }, [products, selectedBrands, sortOrder])
+  }, [products, selectedBrands, categoryFilters, attributeFilters, sortOrder])
 
   return (
     <Modal
@@ -78,6 +100,20 @@ export function SlotPickerModal({ opened, label, products, onSelect, onClose }: 
               clearable
             />
           )}
+          {attributeControls.map((control) => (
+            <MultiSelect
+              key={control.key}
+              size="xs"
+              w={190}
+              classNames={{ inputField: brandSelectClasses.input }}
+              placeholder={(attributeFilters[control.key]?.length ?? 0) ? undefined : control.placeholder}
+              aria-label={`Filter by ${control.label.toLowerCase()}`}
+              data={control.options}
+              value={attributeFilters[control.key] ?? []}
+              onChange={(values) => setAttributeFilters((current) => ({ ...current, [control.key]: values }))}
+              clearable
+            />
+          ))}
           <Select
             size="xs"
             w={180}

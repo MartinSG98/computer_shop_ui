@@ -452,6 +452,7 @@ export function BuildPage() {
       <SlotPickerModal
         opened={activeSlot !== null}
         label={activeLabel}
+        categorySlug={activeSlot}
         products={activeProducts}
         onSelect={select}
         onClose={() => setActiveSlot(null)}
