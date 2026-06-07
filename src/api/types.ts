@@ -70,4 +70,6 @@ export interface EvaluateResult {
   score: number
   errors: string[]
   warnings: string[]
+  /** Up to 3 catalog-grounded improvement tips; empty when the build is a good fit. */
+  recommendations?: string[]
 }

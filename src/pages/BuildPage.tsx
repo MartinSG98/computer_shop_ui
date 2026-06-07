@@ -46,6 +46,7 @@ import {
 } from '../lib/configurator'
 import { SlotPickerModal } from '../components/configurator/SlotPickerModal'
 import { ScoreGauge, ScoreLegend } from '../components/configurator/ScoreGauge'
+import { SuggestionList } from '../components/configurator/SuggestionList'
 import { EvaluateModal } from '../components/configurator/EvaluateModal'
 import { scoreBuild } from '../api/client'
 import { evaluateBuild, issuesBySlot, severityBySlot, type IssueSeverity } from '../lib/compatibility'
@@ -306,7 +307,12 @@ export function BuildPage() {
                   </Box>
                 </Group>
 
-                {/* Recommendations land here in the next step. */}
+                {evalResult && (
+                  <SuggestionList
+                    items={evalResult.recommendations ?? []}
+                    wellMatched={evalResult.errors.length === 0}
+                  />
+                )}
 
                 {evalError ? (
                   <Text size="xs" c="red" ta="center">
