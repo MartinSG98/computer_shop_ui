@@ -122,6 +122,54 @@ const VRAM_FILTER: AttributeFilter = {
   compare: (a, b) => parseInt(a) - parseInt(b),
 }
 
+// Drive type, derived: an rpm spec means a spinning HDD, otherwise the interface
+// tells SSD flavor.
+const DRIVE_TYPE_ORDER = ['NVMe SSD', 'SATA SSD', 'HDD']
+const DRIVE_TYPE_FILTER: AttributeFilter = {
+  key: 'drive_type',
+  label: 'Type',
+  placeholder: 'All types',
+  value: (p) => {
+    if (p.specs.rpm) return 'HDD'
+    const iface = p.attributes?.interface
+    if (iface === 'NVMe') return 'NVMe SSD'
+    if (iface === 'SATA') return 'SATA SSD'
+    return null
+  },
+  compare: (a, b) => DRIVE_TYPE_ORDER.indexOf(a) - DRIVE_TYPE_ORDER.indexOf(b),
+}
+
+// Normalize a capacity string ("500GB", "2TB") to GB for ordering.
+function capacityGb(value: string): number {
+  const num = parseFloat(value)
+  return /TB/i.test(value) ? num * 1000 : num
+}
+
+const CAPACITY_FILTER: AttributeFilter = {
+  key: 'capacity',
+  label: 'Capacity',
+  placeholder: 'All capacities',
+  value: (p) => p.specs.capacity ?? null,
+  compare: (a, b) => capacityGb(a) - capacityGb(b),
+}
+
+// Bus generation from the spec string, e.g. "PCIe 4.0 NVMe" -> "PCIe 4.0".
+const INTERFACE_ORDER = ['PCIe 5.0', 'PCIe 4.0', 'SATA']
+const INTERFACE_FILTER: AttributeFilter = {
+  key: 'interface',
+  label: 'Interface',
+  placeholder: 'All interfaces',
+  value: (p) => {
+    const raw = p.specs.interface
+    if (!raw) return null
+    const pcie = raw.match(/PCIe \d(\.\d)?/i)
+    if (pcie) return pcie[0]
+    if (/SATA/i.test(raw)) return 'SATA'
+    return raw
+  },
+  compare: (a, b) => INTERFACE_ORDER.indexOf(a) - INTERFACE_ORDER.indexOf(b),
+}
+
 /** Attribute filters per category slug. Categories not listed have none. */
 export const CATEGORY_FILTERS: Record<string, AttributeFilter[]> = {
   processors: [PLATFORM_FILTER, TIER_FILTER],
@@ -129,6 +177,7 @@ export const CATEGORY_FILTERS: Record<string, AttributeFilter[]> = {
   motherboards: [SOCKET_FILTER, FORM_FACTOR_FILTER, MEMORY_TYPE_FILTER, TIER_FILTER],
   memory: [MEMORY_TYPE_FILTER],
   'graphics-cards': [VENDOR_FILTER, TIER_FILTER, VRAM_FILTER],
+  storage: [DRIVE_TYPE_FILTER, CAPACITY_FILTER, INTERFACE_FILTER],
 }
 
 export function filtersForCategory(slug: string | null): AttributeFilter[] {
