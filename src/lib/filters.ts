@@ -94,12 +94,41 @@ const MEMORY_TYPE_FILTER: AttributeFilter = {
   value: (p) => p.attributes?.memory_type ?? null,
 }
 
+// GPU chip vendor, derived from the product name (there is no dedicated field).
+const VENDOR_ORDER = ['NVIDIA', 'AMD', 'Intel']
+const VENDOR_FILTER: AttributeFilter = {
+  key: 'vendor',
+  label: 'GPU vendor',
+  placeholder: 'All vendors',
+  value: (p) => {
+    const name = p.name
+    if (/\bArc\b/i.test(name)) return 'Intel'
+    if (/Radeon|\bRX\b/i.test(name)) return 'AMD'
+    if (/GeForce|\bRTX\b|\bGTX\b/i.test(name)) return 'NVIDIA'
+    return null
+  },
+  compare: (a, b) => VENDOR_ORDER.indexOf(a) - VENDOR_ORDER.indexOf(b),
+}
+
+// VRAM size from the spec string, e.g. "16GB GDDR7" -> "16GB".
+const VRAM_FILTER: AttributeFilter = {
+  key: 'vram',
+  label: 'VRAM',
+  placeholder: 'All VRAM',
+  value: (p) => {
+    const match = p.specs.vram?.match(/\d+/)
+    return match ? `${match[0]}GB` : null
+  },
+  compare: (a, b) => parseInt(a) - parseInt(b),
+}
+
 /** Attribute filters per category slug. Categories not listed have none. */
 export const CATEGORY_FILTERS: Record<string, AttributeFilter[]> = {
   processors: [PLATFORM_FILTER, TIER_FILTER],
   'cpu-coolers': [COOLER_TYPE_FILTER],
   motherboards: [SOCKET_FILTER, FORM_FACTOR_FILTER, MEMORY_TYPE_FILTER, TIER_FILTER],
   memory: [MEMORY_TYPE_FILTER],
+  'graphics-cards': [VENDOR_FILTER, TIER_FILTER, VRAM_FILTER],
 }
 
 export function filtersForCategory(slug: string | null): AttributeFilter[] {
