@@ -30,15 +30,15 @@ export const SCORE_BANDS = [
 /** Color-to-meaning key for the build score. */
 export function ScoreLegend() {
   return (
-    <Stack gap={6} w="100%">
+    <Stack gap={6}>
       {SCORE_BANDS.map((b) => (
-        <Group key={b.label} gap={8} justify="space-between" wrap="nowrap">
-          <Group gap={8} wrap="nowrap">
-            <Box w={10} h={10} style={{ borderRadius: 2, backgroundColor: b.color }} />
-            <Text size="xs">{b.label}</Text>
-          </Group>
-          <Text size="xs" c="dimmed">
-            {b.range}
+        <Group key={b.label} gap={8} wrap="nowrap">
+          <Box w={10} h={10} style={{ borderRadius: 2, backgroundColor: b.color, flexShrink: 0 }} />
+          <Text size="xs" lh={1.2}>
+            {b.label}{' '}
+            <Text span size="xs" c="dimmed">
+              {b.range}
+            </Text>
           </Text>
         </Group>
       ))}
@@ -93,7 +93,7 @@ export function ScoreGauge({ score, loading }: Props) {
     <Stack gap={2} align="center">
       <svg
         viewBox={`0 0 ${W} ${H}`}
-        style={{ width: '100%', maxWidth: W, height: 'auto' }}
+        style={{ width: '100%', height: 'auto' }}
         role="img"
         aria-label={score == null ? 'Build not evaluated' : `Build score ${Math.round(score)} out of 100`}
       >

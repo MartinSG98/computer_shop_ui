@@ -296,10 +296,17 @@ export function BuildPage() {
           {/* Build evaluator */}
           <Grid.Col span={{ base: 12, md: 3 }}>
             <Paper withBorder radius="md" p="lg" pos="sticky" top={80} mih={summaryHeight || undefined} display="flex">
-              <Stack gap="sm" align="center" justify="center" flex={1}>
-                <ScoreGauge score={evalResult?.score ?? null} loading={evalLoading} />
+              <Stack gap="sm" align="stretch" flex={1}>
+                <Group align="center" gap="md" wrap="nowrap">
+                  <Box style={{ flex: '1 1 auto', minWidth: 120 }}>
+                    <ScoreGauge score={evalResult?.score ?? null} loading={evalLoading} />
+                  </Box>
+                  <Box style={{ flexShrink: 0 }}>
+                    <ScoreLegend />
+                  </Box>
+                </Group>
 
-                <ScoreLegend />
+                {/* Recommendations land here in the next step. */}
 
                 {evalError ? (
                   <Text size="xs" c="red" ta="center">
