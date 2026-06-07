@@ -200,6 +200,16 @@ const WATTAGE_FILTER: AttributeFilter = {
   compare: (a, b) => WATTAGE_ORDER.indexOf(a) - WATTAGE_ORDER.indexOf(b),
 }
 
+// Case size class (its own form factor), smallest to largest.
+const CASE_FORM_FACTOR_ORDER = ['Mini-ITX', 'Micro-ATX', 'Mid Tower', 'Full Tower']
+const CASE_FORM_FACTOR_FILTER: AttributeFilter = {
+  key: 'case_form_factor',
+  label: 'Form factor',
+  placeholder: 'All form factors',
+  value: (p) => p.specs.form_factor ?? null,
+  compare: (a, b) => CASE_FORM_FACTOR_ORDER.indexOf(a) - CASE_FORM_FACTOR_ORDER.indexOf(b),
+}
+
 /** Attribute filters per category slug. Categories not listed have none. */
 export const CATEGORY_FILTERS: Record<string, AttributeFilter[]> = {
   processors: [PLATFORM_FILTER, TIER_FILTER],
@@ -209,6 +219,7 @@ export const CATEGORY_FILTERS: Record<string, AttributeFilter[]> = {
   'graphics-cards': [VENDOR_FILTER, TIER_FILTER, VRAM_FILTER],
   storage: [DRIVE_TYPE_FILTER, CAPACITY_FILTER, INTERFACE_FILTER],
   'power-supplies': [EFFICIENCY_FILTER, FORM_FACTOR_FILTER, WATTAGE_FILTER],
+  cases: [CASE_FORM_FACTOR_FILTER],
 }
 
 export function filtersForCategory(slug: string | null): AttributeFilter[] {
