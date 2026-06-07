@@ -8,6 +8,7 @@ import {
   MultiSelect,
   ScrollArea,
   Select,
+  SimpleGrid,
   Stack,
   Text,
   Tooltip,
@@ -86,11 +87,10 @@ export function SlotPickerModal({ opened, label, categorySlug, products, onSelec
       scrollAreaComponent={ScrollArea.Autosize}
     >
       <Stack gap="sm">
-        <Group gap="sm" align="center">
+        <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="sm" verticalSpacing="sm">
           {showBrandFilter && (
             <MultiSelect
               size="xs"
-              w={190}
               classNames={{ inputField: brandSelectClasses.input }}
               placeholder={selectedBrands.length ? undefined : 'All brands'}
               aria-label="Filter by brand"
@@ -104,7 +104,6 @@ export function SlotPickerModal({ opened, label, categorySlug, products, onSelec
             <MultiSelect
               key={control.key}
               size="xs"
-              w={190}
               classNames={{ inputField: brandSelectClasses.input }}
               placeholder={(attributeFilters[control.key]?.length ?? 0) ? undefined : control.placeholder}
               aria-label={`Filter by ${control.label.toLowerCase()}`}
@@ -116,7 +115,6 @@ export function SlotPickerModal({ opened, label, categorySlug, products, onSelec
           ))}
           <Select
             size="xs"
-            w={180}
             aria-label="Sort by price"
             value={sortOrder}
             onChange={(value) => value && setSortOrder(value as SortOrder)}
@@ -126,7 +124,7 @@ export function SlotPickerModal({ opened, label, categorySlug, products, onSelec
               { value: 'price-desc', label: 'Price: High to Low' },
             ]}
           />
-        </Group>
+        </SimpleGrid>
 
         <Stack gap={4}>
           {visible.map((product) => {

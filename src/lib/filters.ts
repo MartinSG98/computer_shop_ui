@@ -72,10 +72,33 @@ const COOLER_TYPE_FILTER: AttributeFilter = {
   compare: (a, b) => COOLER_TYPE_ORDER.indexOf(a) - COOLER_TYPE_ORDER.indexOf(b),
 }
 
+// Plain socket (not brand-prefixed like the CPU platform), e.g. "AM5", "LGA1851".
+const SOCKET_FILTER: AttributeFilter = {
+  key: 'socket',
+  label: 'Socket',
+  placeholder: 'All sockets',
+  value: (p) => p.attributes?.socket ?? null,
+}
+
+const FORM_FACTOR_FILTER: AttributeFilter = {
+  key: 'form_factor',
+  label: 'Form factor',
+  placeholder: 'All form factors',
+  value: (p) => p.attributes?.form_factor ?? null,
+}
+
+const MEMORY_TYPE_FILTER: AttributeFilter = {
+  key: 'memory_type',
+  label: 'Memory type',
+  placeholder: 'All memory types',
+  value: (p) => p.attributes?.memory_type ?? null,
+}
+
 /** Attribute filters per category slug. Categories not listed have none. */
 export const CATEGORY_FILTERS: Record<string, AttributeFilter[]> = {
   processors: [PLATFORM_FILTER, TIER_FILTER],
   'cpu-coolers': [COOLER_TYPE_FILTER],
+  motherboards: [SOCKET_FILTER, FORM_FACTOR_FILTER, MEMORY_TYPE_FILTER, TIER_FILTER],
 }
 
 export function filtersForCategory(slug: string | null): AttributeFilter[] {
