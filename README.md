@@ -4,11 +4,14 @@ React + Vite + TypeScript + Mantine frontend for the Computer Shop. It uses
 react-router for two pages:
 
 - **Shop** (`/`): loads the assortment and categories from the API on startup,
-  with category and per-category brand filtering, price sorting, a product
-  detail modal, and a cart that persists in localStorage.
+  with category, brand, and per-category attribute filters (for example CPU
+  platform and tier, GPU vendor and VRAM, storage type and capacity, PSU
+  efficiency), price sorting, a product detail modal, and a cart that persists in
+  localStorage.
 - **PC builder** (`/build`): pick a part for each of the 8 build slots from a
-  filterable picker (brand, price, specs on hover), with a running total and
-  estimated power draw. A compatibility engine flags errors and warnings (socket,
+  searchable, filterable picker (name/brand search, the same per-category
+  attribute filters as the shop, price sort, specs on hover), with a running
+  total and estimated power draw. A compatibility engine flags errors and warnings (socket,
   RAM, clearances, PSU wattage, and so on) inline and in the summary, plus blue
   balance tips for overkill and bottlenecks. Once all 8 slots are filled, an
   optional evaluator scores the build 0 to 100 for a chosen use case and
@@ -18,7 +21,9 @@ react-router for two pages:
   navigation and reload.
 
 Compatibility and tips are driven by typed `attributes` and a `tier` on each
-build-category product, served by the API.
+build-category product, served by the API. The per-category attribute filters
+used by both the shop and the picker are defined in `src/lib/filters.ts`, so
+adding a filter for another category is a single config entry.
 
 ## Develop
 
