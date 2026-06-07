@@ -10,8 +10,12 @@ react-router for two pages:
   filterable picker (brand, price, specs on hover), with a running total and
   estimated power draw. A compatibility engine flags errors and warnings (socket,
   RAM, clearances, PSU wattage, and so on) inline and in the summary, plus blue
-  balance tips for overkill and bottlenecks. The finished build adds to the cart,
-  and is saved in localStorage so it survives navigation and reload.
+  balance tips for overkill and bottlenecks. Once all 8 slots are filled, an
+  optional evaluator scores the build 0 to 100 for a chosen use case and
+  resolution (asked one at a time in a small modal), shown on an animated
+  speedometer gauge, alongside catalog grounded improvement suggestions. The
+  finished build adds to the cart, and is saved in localStorage so it survives
+  navigation and reload.
 
 Compatibility and tips are driven by typed `attributes` and a `tier` on each
 build-category product, served by the API.
@@ -101,5 +105,6 @@ export default tseslint.config({
 Part of the Computer Shop project:
 
 - [computer-shop-backend](https://github.com/MartinSG98/computer-shop-backend) — FastAPI backend API
+- [computer-shop-build-eval](https://github.com/MartinSG98/computer-shop-build-eval) — PC build scorer + suggestions (eval Lambda)
 - [tf-module-computer_shop](https://github.com/MartinSG98/tf-module-computer_shop) — Terraform infrastructure module
 - [tf-stack-computer_shop](https://github.com/MartinSG98/tf-stack-computer_shop) — Terraform deployment stack
