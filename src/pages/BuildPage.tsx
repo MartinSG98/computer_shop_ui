@@ -45,7 +45,7 @@ import {
   type BuildSlug,
 } from '../lib/configurator'
 import { SlotPickerModal } from '../components/configurator/SlotPickerModal'
-import { ScoreGauge } from '../components/configurator/ScoreGauge'
+import { ScoreGauge, ScoreLegend } from '../components/configurator/ScoreGauge'
 import { EvaluateModal } from '../components/configurator/EvaluateModal'
 import { scoreBuild } from '../api/client'
 import { evaluateBuild, issuesBySlot, severityBySlot, type IssueSeverity } from '../lib/compatibility'
@@ -298,6 +298,8 @@ export function BuildPage() {
             <Paper withBorder radius="md" p="lg" pos="sticky" top={80} mih={summaryHeight || undefined} display="flex">
               <Stack gap="sm" align="center" justify="center" flex={1}>
                 <ScoreGauge score={evalResult?.score ?? null} loading={evalLoading} />
+
+                <ScoreLegend />
 
                 {evalError ? (
                   <Text size="xs" c="red" ta="center">

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Stack, Text } from '@mantine/core'
+import { Box, Group, Stack, Text } from '@mantine/core'
 
 // Semicircle gauge geometry. The arc sweeps left (0) to right (100) over the top.
 const W = 220
@@ -18,6 +18,32 @@ function bandColor(score: number): string {
   if (score < 40) return 'var(--mantine-color-red-6)'
   if (score < 70) return 'var(--mantine-color-yellow-6)'
   return 'var(--mantine-color-teal-6)'
+}
+
+// Score bands, shown in the legend (high to low). Ranges line up with bandColor.
+export const SCORE_BANDS = [
+  { label: 'Excellent', range: '70-100', color: 'var(--mantine-color-teal-6)' },
+  { label: 'Capable', range: '40-69', color: 'var(--mantine-color-yellow-6)' },
+  { label: 'Underpowered', range: '0-39', color: 'var(--mantine-color-red-6)' },
+]
+
+/** Color-to-meaning key for the build score. */
+export function ScoreLegend() {
+  return (
+    <Stack gap={6} w="100%">
+      {SCORE_BANDS.map((b) => (
+        <Group key={b.label} gap={8} justify="space-between" wrap="nowrap">
+          <Group gap={8} wrap="nowrap">
+            <Box w={10} h={10} style={{ borderRadius: 2, backgroundColor: b.color }} />
+            <Text size="xs">{b.label}</Text>
+          </Group>
+          <Text size="xs" c="dimmed">
+            {b.range}
+          </Text>
+        </Group>
+      ))}
+    </Stack>
+  )
 }
 
 function easeOutCubic(x: number): number {
