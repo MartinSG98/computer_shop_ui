@@ -11,10 +11,11 @@ import {
   SimpleGrid,
   Stack,
   Text,
+  TextInput,
   Tooltip,
   UnstyledButton,
 } from '@mantine/core'
-import { IconPhoto } from '@tabler/icons-react'
+import { IconPhoto, IconSearch } from '@tabler/icons-react'
 import type { Product } from '../../api/types'
 import { formatPrice } from '../../lib/format'
 import { filterOptions, filtersForCategory, matchesAttributeFilters } from '../../lib/filters'
@@ -37,12 +38,14 @@ export function SlotPickerModal({ opened, label, categorySlug, products, onSelec
   const [sortOrder, setSortOrder] = useState<SortOrder>('price-asc')
   const [selectedBrands, setSelectedBrands] = useState<string[]>([])
   const [attributeFilters, setAttributeFilters] = useState<Record<string, string[]>>({})
+  const [query, setQuery] = useState('')
 
-  // Reset the filters whenever the picker switches to a different slot.
+  // Reset the filters and search whenever the picker switches to a different slot.
   useEffect(() => {
     setSortOrder('price-asc')
     setSelectedBrands([])
     setAttributeFilters({})
+    setQuery('')
   }, [label])
 
   const availableBrands = useMemo(
@@ -73,9 +76,16 @@ export function SlotPickerModal({ opened, label, categorySlug, products, onSelec
     const byAttributes = byBrand.filter((p) =>
       matchesAttributeFilters(p, categoryFilters, attributeFilters),
     )
-    const sorted = [...byAttributes].sort((a, b) => Number(a.price) - Number(b.price))
+    const q = query.trim().toLowerCase()
+    const bySearch =
+      q === ''
+        ? byAttributes
+        : byAttributes.filter(
+            (p) => p.name.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q),
+          )
+    const sorted = [...bySearch].sort((a, b) => Number(a.price) - Number(b.price))
     return sortOrder === 'price-desc' ? sorted.reverse() : sorted
-  }, [products, selectedBrands, categoryFilters, attributeFilters, sortOrder])
+  }, [products, selectedBrands, categoryFilters, attributeFilters, query, sortOrder])
 
   return (
     <Modal
@@ -87,6 +97,14 @@ export function SlotPickerModal({ opened, label, categorySlug, products, onSelec
       scrollAreaComponent={ScrollArea.Autosize}
     >
       <Stack gap="sm">
+        <TextInput
+          size="xs"
+          placeholder="Search by name or brand"
+          leftSection={<IconSearch size={16} />}
+          value={query}
+          onChange={(event) => setQuery(event.currentTarget.value)}
+          aria-label={`Search ${label.toLowerCase()}s`}
+        />
         <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="sm" verticalSpacing="sm">
           {showBrandFilter && (
             <MultiSelect
