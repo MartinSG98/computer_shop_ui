@@ -60,3 +60,14 @@ export interface Category {
   sort_order: number
   image_url: string | null
 }
+
+export type UseCase = 'gaming' | 'content' | 'everyday'
+export type Resolution = '1080p' | '1440p' | '4k'
+
+/** Response from the build evaluator (POST /evaluate). */
+export interface EvaluateResult {
+  /** 0-100 build-quality score for the given use case and resolution. */
+  score: number
+  errors: string[]
+  warnings: string[]
+}
