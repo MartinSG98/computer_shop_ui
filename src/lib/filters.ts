@@ -170,6 +170,36 @@ const INTERFACE_FILTER: AttributeFilter = {
   compare: (a, b) => INTERFACE_ORDER.indexOf(a) - INTERFACE_ORDER.indexOf(b),
 }
 
+// PSU efficiency rating (80 PLUS), worst to best.
+const EFFICIENCY_ORDER = ['80+ Bronze', '80+ Gold', '80+ Platinum', '80+ Titanium']
+const EFFICIENCY_FILTER: AttributeFilter = {
+  key: 'efficiency',
+  label: 'Efficiency',
+  placeholder: 'All ratings',
+  value: (p) => p.specs.rating ?? null,
+  compare: (a, b) => EFFICIENCY_ORDER.indexOf(a) - EFFICIENCY_ORDER.indexOf(b),
+}
+
+// PSU wattage grouped into ranges rather than every exact value.
+const WATTAGE_BANDS: { label: string; match: (w: number) => boolean }[] = [
+  { label: 'Under 650W', match: (w) => w < 650 },
+  { label: '650-850W', match: (w) => w >= 650 && w < 850 },
+  { label: '850-1000W', match: (w) => w >= 850 && w <= 1000 },
+  { label: '1000W+', match: (w) => w > 1000 },
+]
+const WATTAGE_ORDER = WATTAGE_BANDS.map((b) => b.label)
+const WATTAGE_FILTER: AttributeFilter = {
+  key: 'wattage',
+  label: 'Wattage',
+  placeholder: 'All wattages',
+  value: (p) => {
+    const w = p.attributes?.wattage_w
+    if (w == null) return null
+    return WATTAGE_BANDS.find((band) => band.match(w))?.label ?? null
+  },
+  compare: (a, b) => WATTAGE_ORDER.indexOf(a) - WATTAGE_ORDER.indexOf(b),
+}
+
 /** Attribute filters per category slug. Categories not listed have none. */
 export const CATEGORY_FILTERS: Record<string, AttributeFilter[]> = {
   processors: [PLATFORM_FILTER, TIER_FILTER],
@@ -178,6 +208,7 @@ export const CATEGORY_FILTERS: Record<string, AttributeFilter[]> = {
   memory: [MEMORY_TYPE_FILTER],
   'graphics-cards': [VENDOR_FILTER, TIER_FILTER, VRAM_FILTER],
   storage: [DRIVE_TYPE_FILTER, CAPACITY_FILTER, INTERFACE_FILTER],
+  'power-supplies': [EFFICIENCY_FILTER, FORM_FACTOR_FILTER, WATTAGE_FILTER],
 }
 
 export function filtersForCategory(slug: string | null): AttributeFilter[] {
