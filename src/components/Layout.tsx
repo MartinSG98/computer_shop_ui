@@ -15,6 +15,11 @@ export function Layout() {
   // The product search only filters the shop grid, so it's hidden on /build.
   const showSearch = !onBuild
 
+  // Primary header action; full button on desktop, icon-only on mobile to fit.
+  const cta = onBuild
+    ? { to: '/', label: 'Back to shop', icon: <IconArrowLeft size={18} /> }
+    : { to: '/build', label: 'Build a PC', icon: <IconTools size={18} /> }
+
   return (
     <AppShell header={{ height: 64 }} padding={0}>
       <AppShell.Header>
@@ -22,7 +27,7 @@ export function Layout() {
           <Group style={{ flex: 1 }} gap="sm" wrap="nowrap">
             <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
               <Group gap="sm" wrap="nowrap">
-                <Image src="/msg_logo.webp" alt="MSG" h={52} w="auto" fit="contain" />
+                <Image src="/msg_logo.webp" alt="MSG" h={52} w="auto" fit="contain" visibleFrom="sm" />
                 <Stack gap={0}>
                   <Text
                     fw={800}
@@ -65,26 +70,30 @@ export function Layout() {
                 {mobileSearchOpen ? <IconX size={18} /> : <IconSearch size={18} />}
               </ActionIcon>
             )}
-            {onBuild ? (
-              <Button
+            <Button
+              component={Link}
+              to={cta.to}
+              variant="gradient"
+              gradient={{ from: 'violet', to: 'grape', deg: 135 }}
+              leftSection={cta.icon}
+              visibleFrom="sm"
+            >
+              {cta.label}
+            </Button>
+            {/* On shop pages the mobile build CTA is the sticky bottom bar, so the
+                header only needs the icon action for "Back to shop" on /build. */}
+            {onBuild && (
+              <ActionIcon
                 component={Link}
-                to="/"
+                to={cta.to}
                 variant="gradient"
                 gradient={{ from: 'violet', to: 'grape', deg: 135 }}
-                leftSection={<IconArrowLeft size={18} />}
+                size="lg"
+                hiddenFrom="sm"
+                aria-label={cta.label}
               >
-                Back to shop
-              </Button>
-            ) : (
-              <Button
-                component={Link}
-                to="/build"
-                variant="gradient"
-                gradient={{ from: 'violet', to: 'grape', deg: 135 }}
-                leftSection={<IconTools size={18} />}
-              >
-                Build a PC
-              </Button>
+                {cta.icon}
+              </ActionIcon>
             )}
             <Cart />
             <ColorSchemeToggle />
@@ -111,6 +120,38 @@ export function Layout() {
         )}
 
         <Outlet />
+
+        {/* Mobile-only sticky "Build a PC" CTA, on shop pages only. The spacer
+            keeps the pinned bar from covering the footer when scrolled down. */}
+        {!onBuild && (
+          <>
+            <Box hiddenFrom="sm" h={72} />
+            <Box
+              hiddenFrom="sm"
+              p="sm"
+              style={{
+                position: 'fixed',
+                insetInline: 0,
+                bottom: 0,
+                zIndex: 100,
+                background: 'var(--mantine-color-body)',
+                borderTop: '1px solid var(--mantine-color-default-border)',
+              }}
+            >
+              <Button
+                component={Link}
+                to="/build"
+                fullWidth
+                size="md"
+                variant="gradient"
+                gradient={{ from: 'violet', to: 'grape', deg: 135 }}
+                leftSection={<IconTools size={18} />}
+              >
+                Build a PC
+              </Button>
+            </Box>
+          </>
+        )}
       </AppShell.Main>
     </AppShell>
   )
