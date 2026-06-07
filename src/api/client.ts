@@ -41,7 +41,7 @@ export function getCategories(): Promise<Category[]> {
 }
 
 /** Score a complete build for a use case + resolution via the evaluator Lambda. */
-export async function evaluateBuild(
+export async function scoreBuild(
   build: BuildSelection,
   useCase: UseCase,
   resolution: Resolution,

@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react'
 import { Stack, Text } from '@mantine/core'
 
 // Semicircle gauge geometry. The arc sweeps left (0) to right (100) over the top.
@@ -10,10 +11,17 @@ const STROKE = 16
 const ARC_LEN = Math.PI * R
 const TRACK = `M ${CX - R} ${CY} A ${R} ${R} 0 0 1 ${CX + R} ${CY}`
 
+// How long the needle takes to sweep from 0 to the score.
+const FILL_MS = 2500
+
 function bandColor(score: number): string {
   if (score < 40) return 'var(--mantine-color-red-6)'
   if (score < 70) return 'var(--mantine-color-yellow-6)'
   return 'var(--mantine-color-teal-6)'
+}
+
+function easeOutCubic(x: number): number {
+  return 1 - Math.pow(1 - x, 3)
 }
 
 interface Props {
@@ -23,9 +31,37 @@ interface Props {
 }
 
 export function ScoreGauge({ score, loading }: Props) {
-  const t = score == null ? 0 : Math.max(0, Math.min(100, score)) / 100
+  // Value the gauge is currently showing. Ramps up to `score` over FILL_MS.
+  const [shown, setShown] = useState<number | null>(null)
+  const frame = useRef<number | undefined>(undefined)
+
+  useEffect(() => {
+    if (frame.current) cancelAnimationFrame(frame.current)
+
+    if (score == null) {
+      setShown(null)
+      return
+    }
+
+    const target = Math.max(0, Math.min(100, score))
+    let start: number | null = null
+
+    const tick = (now: number) => {
+      if (start == null) start = now
+      const p = Math.min(1, (now - start) / FILL_MS)
+      setShown(target * easeOutCubic(p))
+      if (p < 1) frame.current = requestAnimationFrame(tick)
+    }
+
+    frame.current = requestAnimationFrame(tick)
+    return () => {
+      if (frame.current) cancelAnimationFrame(frame.current)
+    }
+  }, [score])
+
+  const t = shown == null ? 0 : shown / 100
   const rotation = (t - 0.5) * 180 // -90 points left (0), +90 points right (100)
-  const color = score == null ? 'var(--mantine-color-dimmed)' : bandColor(score)
+  const color = shown == null ? 'var(--mantine-color-dimmed)' : bandColor(shown)
 
   return (
     <Stack gap={2} align="center">
@@ -37,7 +73,7 @@ export function ScoreGauge({ score, loading }: Props) {
       >
         <path d={TRACK} fill="none" stroke="var(--mantine-color-default-border)" strokeWidth={STROKE} strokeLinecap="round" />
 
-        {score != null && (
+        {shown != null && (
           <path
             d={TRACK}
             fill="none"
@@ -46,16 +82,14 @@ export function ScoreGauge({ score, loading }: Props) {
             strokeLinecap="round"
             strokeDasharray={ARC_LEN}
             strokeDashoffset={ARC_LEN * (1 - t)}
-            style={{ transition: 'stroke-dashoffset 700ms ease' }}
           />
         )}
 
-        {score != null && (
+        {shown != null && (
           <g
             style={{
               transform: `rotate(${rotation}deg)`,
               transformOrigin: `${CX}px ${CY}px`,
-              transition: 'transform 700ms ease',
             }}
           >
             <line x1={CX} y1={CY} x2={CX} y2={CY - R + STROKE / 2} stroke={color} strokeWidth={3} strokeLinecap="round" />
@@ -64,8 +98,8 @@ export function ScoreGauge({ score, loading }: Props) {
         )}
       </svg>
 
-      <Text fw={800} fz={34} lh={1} c={score == null ? 'dimmed' : color}>
-        {loading ? '...' : score == null ? '--' : Math.round(score)}
+      <Text fw={800} fz={34} lh={1} c={shown == null ? 'dimmed' : color}>
+        {loading ? '...' : shown == null ? '--' : Math.round(shown)}
       </Text>
       <Text size="xs" c="dimmed" tt="uppercase" lts={1.5}>
         Build score

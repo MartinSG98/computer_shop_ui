@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocalStorage } from '@mantine/hooks'
 import {
   ActionIcon,
@@ -26,12 +26,13 @@ import {
   IconDeviceGamepad,
   IconDeviceSdCard,
   IconDevices2,
+  IconGauge,
   IconInfoCircle,
   IconShoppingCart,
   IconTemperature,
   IconX,
 } from '@tabler/icons-react'
-import type { Product } from '../api/types'
+import type { EvaluateResult, Product, Resolution, UseCase } from '../api/types'
 import { useShop } from '../context/shop-context'
 import { useCart } from '../context/cart-context'
 import { formatPrice } from '../lib/format'
@@ -44,6 +45,9 @@ import {
   type BuildSlug,
 } from '../lib/configurator'
 import { SlotPickerModal } from '../components/configurator/SlotPickerModal'
+import { ScoreGauge } from '../components/configurator/ScoreGauge'
+import { EvaluateModal } from '../components/configurator/EvaluateModal'
+import { scoreBuild } from '../api/client'
 import { evaluateBuild, issuesBySlot, severityBySlot, type IssueSeverity } from '../lib/compatibility'
 
 const SLOT_ICONS: Record<BuildSlug, typeof IconCpu> = {
@@ -81,6 +85,14 @@ export function BuildPage() {
   const [activeSlot, setActiveSlot] = useState<BuildSlug | null>(null)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [justAdded, setJustAdded] = useState(false)
+  const [evalOpen, setEvalOpen] = useState(false)
+  const [evalLoading, setEvalLoading] = useState(false)
+  const [evalResult, setEvalResult] = useState<EvaluateResult | null>(null)
+  const [evalError, setEvalError] = useState<string | null>(null)
+  const [evalNote, setEvalNote] = useState<string | null>(null)
+  // Signature (parts + use case + resolution) of the last successful score, so
+  // re-running with identical inputs skips the call. Cleared when the build changes.
+  const lastEvalSig = useRef<string | null>(null)
 
   const productById = useMemo(() => new Map(products.map((p) => [p.id, p])), [products])
   const selection: BuildSelection = useMemo(() => {
@@ -112,6 +124,9 @@ export function BuildPage() {
     setSelectedIds((current) => ({ ...current, [activeSlot]: product.id }))
     setActiveSlot(null)
     setJustAdded(false)
+    setEvalResult(null)
+    setEvalNote(null)
+    lastEvalSig.current = null
   }
 
   const clear = (slug: BuildSlug) => {
@@ -121,6 +136,9 @@ export function BuildPage() {
       return next
     })
     setJustAdded(false)
+    setEvalResult(null)
+    setEvalNote(null)
+    lastEvalSig.current = null
   }
 
   const addBuild = () => {
@@ -138,6 +156,37 @@ export function BuildPage() {
       return
     }
     addBuild()
+  }
+
+  const isComplete = filled === BUILD_SLOTS.length
+
+  // Auto-dismiss the "same answers" note after a few seconds.
+  useEffect(() => {
+    if (!evalNote) return
+    const id = setTimeout(() => setEvalNote(null), 8000)
+    return () => clearTimeout(id)
+  }, [evalNote])
+
+  const runEvaluate = async (useCase: UseCase, resolution: Resolution) => {
+    setEvalOpen(false)
+    // Skip the call if nothing changed since the last score (same parts + answers).
+    const sig = `${JSON.stringify(selectedIds)}|${useCase}|${resolution}`
+    if (sig === lastEvalSig.current && evalResult) {
+      setEvalNote('This score already reflects the same parts and answers.')
+      return
+    }
+    setEvalNote(null)
+    setEvalLoading(true)
+    setEvalError(null)
+    try {
+      const result = await scoreBuild(selection, useCase, resolution)
+      setEvalResult(result)
+      lastEvalSig.current = sig
+    } catch (err) {
+      setEvalError(err instanceof Error ? err.message : 'Evaluation failed')
+    } finally {
+      setEvalLoading(false)
+    }
   }
 
   return (
@@ -242,8 +291,46 @@ export function BuildPage() {
             </Stack>
           </Grid.Col>
 
-          {/* Reserved empty space between the build list and the summary. */}
-          <Grid.Col span={{ base: 12, md: 3 }} visibleFrom="md" />
+          {/* Build evaluator */}
+          <Grid.Col span={{ base: 12, md: 3 }}>
+            <Paper withBorder radius="md" p="lg" pos="sticky" top={80}>
+              <Stack gap="sm" align="center">
+                <ScoreGauge score={evalResult?.score ?? null} loading={evalLoading} />
+
+                {evalError ? (
+                  <Text size="xs" c="red" ta="center">
+                    {evalError}
+                  </Text>
+                ) : evalResult && evalResult.errors.length > 0 ? (
+                  <Text size="xs" c="red" ta="center">
+                    Not compatible. Fix the flagged parts and re-evaluate.
+                  </Text>
+                ) : null}
+
+                {evalNote && (
+                  <Text size="xs" c="yellow.7" fw={500} ta="center">
+                    {evalNote}
+                  </Text>
+                )}
+
+                <Button
+                  fullWidth
+                  leftSection={<IconGauge size={18} />}
+                  onClick={() => setEvalOpen(true)}
+                  disabled={!isComplete || evalLoading}
+                  loading={evalLoading}
+                >
+                  Evaluate build
+                </Button>
+
+                {!isComplete && (
+                  <Text size="xs" c="dimmed" ta="center">
+                    Fill all {BUILD_SLOTS.length} slots to evaluate.
+                  </Text>
+                )}
+              </Stack>
+            </Paper>
+          </Grid.Col>
 
           <Grid.Col span={{ base: 12, md: 4 }}>
             <Paper withBorder radius="md" p="lg" pos="sticky" top={80}>
@@ -396,6 +483,12 @@ export function BuildPage() {
           </Group>
         </Stack>
       </Modal>
+
+      <EvaluateModal
+        opened={evalOpen}
+        onClose={() => setEvalOpen(false)}
+        onComplete={runEvaluate}
+      />
     </Box>
   )
 }
