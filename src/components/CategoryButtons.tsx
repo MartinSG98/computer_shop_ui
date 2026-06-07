@@ -52,7 +52,7 @@ export function CategoryButtons() {
   return (
     <>
       {/* Desktop: wave tabs attached to the hero edge. */}
-      <ScrollArea scrollbars="x" type="auto" visibleFrom="sm">
+      <ScrollArea scrollbars="x" type="auto" offsetScrollbars="x" visibleFrom="sm">
         {/* "safe center" centers the tabs when they fit but falls back to
             left-aligned on overflow, so the first tab is never clipped out of
             reach when scrolled fully left. */}
