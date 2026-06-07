@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useLocalStorage } from '@mantine/hooks'
+import { useElementSize, useLocalStorage } from '@mantine/hooks'
 import {
   ActionIcon,
   Box,
@@ -93,6 +93,8 @@ export function BuildPage() {
   // Signature (parts + use case + resolution) of the last successful score, so
   // re-running with identical inputs skips the call. Cleared when the build changes.
   const lastEvalSig = useRef<string | null>(null)
+  // Match the evaluator card height to the summary card beside it.
+  const { ref: summaryRef, height: summaryHeight } = useElementSize()
 
   const productById = useMemo(() => new Map(products.map((p) => [p.id, p])), [products])
   const selection: BuildSelection = useMemo(() => {
@@ -293,8 +295,8 @@ export function BuildPage() {
 
           {/* Build evaluator */}
           <Grid.Col span={{ base: 12, md: 3 }}>
-            <Paper withBorder radius="md" p="lg" pos="sticky" top={80}>
-              <Stack gap="sm" align="center">
+            <Paper withBorder radius="md" p="lg" pos="sticky" top={80} mih={summaryHeight || undefined} display="flex">
+              <Stack gap="sm" align="center" justify="center" flex={1}>
                 <ScoreGauge score={evalResult?.score ?? null} loading={evalLoading} />
 
                 {evalError ? (
@@ -333,7 +335,7 @@ export function BuildPage() {
           </Grid.Col>
 
           <Grid.Col span={{ base: 12, md: 4 }}>
-            <Paper withBorder radius="md" p="lg" pos="sticky" top={80}>
+            <Paper ref={summaryRef} withBorder radius="md" p="lg" pos="sticky" top={80}>
               <Stack gap="sm">
                 <Title order={4}>Summary</Title>
                 <Group justify="space-between">
