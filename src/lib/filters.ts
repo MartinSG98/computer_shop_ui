@@ -57,9 +57,25 @@ const TIER_FILTER: AttributeFilter = {
   compare: (a, b) => TIER_ORDER.indexOf(a) - TIER_ORDER.indexOf(b),
 }
 
+// Cooler cooling method. Catalog stores lowercase "air" / "aio".
+const COOLER_TYPE_LABELS: Record<string, string> = { air: 'Air', aio: 'AIO' }
+const COOLER_TYPE_ORDER = ['Air', 'AIO']
+
+const COOLER_TYPE_FILTER: AttributeFilter = {
+  key: 'cooler_type',
+  label: 'Cooler type',
+  placeholder: 'All types',
+  value: (p) => {
+    const type = p.attributes?.cooler_type
+    return type ? (COOLER_TYPE_LABELS[type] ?? type) : null
+  },
+  compare: (a, b) => COOLER_TYPE_ORDER.indexOf(a) - COOLER_TYPE_ORDER.indexOf(b),
+}
+
 /** Attribute filters per category slug. Categories not listed have none. */
 export const CATEGORY_FILTERS: Record<string, AttributeFilter[]> = {
   processors: [PLATFORM_FILTER, TIER_FILTER],
+  'cpu-coolers': [COOLER_TYPE_FILTER],
 }
 
 export function filtersForCategory(slug: string | null): AttributeFilter[] {
