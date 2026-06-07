@@ -1,0 +1,13 @@
+.option {
+  width: 100%;
+  border: 1px solid var(--mantine-color-default-border);
+  border-radius: var(--mantine-radius-md);
+  transition:
+    border-color 120ms ease,
+    background-color 120ms ease;
+}
+
+.option:hover {
+  border-color: var(--mantine-color-violet-5);
+  background-color: var(--mantine-color-default-hover);
+}
