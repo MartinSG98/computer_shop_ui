@@ -99,6 +99,7 @@ export const CATEGORY_FILTERS: Record<string, AttributeFilter[]> = {
   processors: [PLATFORM_FILTER, TIER_FILTER],
   'cpu-coolers': [COOLER_TYPE_FILTER],
   motherboards: [SOCKET_FILTER, FORM_FACTOR_FILTER, MEMORY_TYPE_FILTER, TIER_FILTER],
+  memory: [MEMORY_TYPE_FILTER],
 }
 
 export function filtersForCategory(slug: string | null): AttributeFilter[] {
