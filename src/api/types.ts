@@ -73,3 +73,8 @@ export interface EvaluateResult {
   /** Up to 3 catalog-grounded improvement tips; empty when the build is a good fit. */
   recommendations?: string[]
 }
+
+/** Response from the support agent (POST /chat). */
+export interface ChatReply {
+  reply: string
+}

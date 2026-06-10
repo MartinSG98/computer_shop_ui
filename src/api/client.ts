@@ -1,4 +1,4 @@
-import type { Category, EvaluateResult, Product, Resolution, UseCase } from './types'
+import type { Category, ChatReply, EvaluateResult, Product, Resolution, UseCase } from './types'
 import type { BuildSelection } from '../lib/configurator'
 
 /** API base URL. Defaults to the local backend so the app runs with no config. */
@@ -38,6 +38,30 @@ export function getProduct(id: string): Promise<Product> {
 
 export function getCategories(): Promise<Category[]> {
   return request<Category[]>('/categories')
+}
+
+/** Maximum message length accepted by POST /chat (mirrored from the backend). */
+export const CHAT_MESSAGE_MAX_LENGTH = 500
+
+/**
+ * Send one message to the support agent. The session id (one UUID per chat
+ * window) is what threads messages into a conversation server-side.
+ */
+export async function sendChatMessage(message: string, sessionId: string): Promise<ChatReply> {
+  let response: Response
+  try {
+    response = await fetch(`${BASE_URL}/chat`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ message, session_id: sessionId }),
+    })
+  } catch {
+    throw new ApiError(0, 'Network error: could not reach the API')
+  }
+  if (!response.ok) {
+    throw new ApiError(response.status, `Chat failed (${response.status} ${response.statusText})`)
+  }
+  return response.json() as Promise<ChatReply>
 }
 
 /** Score a complete build for a use case + resolution via the evaluator Lambda. */
