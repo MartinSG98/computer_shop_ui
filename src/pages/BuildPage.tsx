@@ -30,6 +30,7 @@ import {
   IconInfoCircle,
   IconShoppingCart,
   IconTemperature,
+  IconTrash,
   IconX,
 } from '@tabler/icons-react'
 import type { EvaluateResult, Product, Resolution, UseCase } from '../api/types'
@@ -144,6 +145,14 @@ export function BuildPage() {
     lastEvalSig.current = null
   }
 
+  const clearAll = () => {
+    setSelectedIds({})
+    setJustAdded(false)
+    setEvalResult(null)
+    setEvalNote(null)
+    lastEvalSig.current = null
+  }
+
   const addBuild = () => {
     Object.values(selection).forEach((product) => {
       if (product) addItem(product)
@@ -211,6 +220,18 @@ export function BuildPage() {
         <Grid gap="lg">
           <Grid.Col span={{ base: 12, md: 5 }}>
             <Stack gap="sm">
+              {filled > 0 && (
+                <Group justify="flex-end">
+                  <Button
+                    variant="default"
+                    size="xs"
+                    leftSection={<IconTrash size={16} color="var(--mantine-color-red-6)" />}
+                    onClick={clearAll}
+                  >
+                    Clear all
+                  </Button>
+                </Group>
+              )}
               {BUILD_SLOTS.map(({ slug, label }) => {
                 const product = selection[slug]
                 const Icon = SLOT_ICONS[slug]
