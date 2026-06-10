@@ -1,4 +1,4 @@
-# Computer Shop UI
+# Computer Shop UI - https://dxxggszhxub5x.cloudfront.net or msg-computers.com
 
 React + Vite + TypeScript + Mantine frontend for the Computer Shop. It uses
 react-router for two pages:
