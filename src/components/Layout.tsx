@@ -1,14 +1,16 @@
 import { ActionIcon, AppShell, Box, Button, Collapse, Group, Image, Stack, Text, TextInput } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
-import { IconArrowLeft, IconSearch, IconTools, IconX } from '@tabler/icons-react'
+import { IconArrowLeft, IconMessageCircle, IconSearch, IconTools, IconX } from '@tabler/icons-react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import { Cart } from './Cart'
+import { ChatWidget } from './chat/ChatWidget'
 import { ColorSchemeToggle } from './ColorSchemeToggle'
 import { useShop } from '../context/shop-context'
 
 export function Layout() {
   const { searchQuery, setSearchQuery } = useShop()
   const [mobileSearchOpen, { toggle: toggleMobileSearch }] = useDisclosure(false)
+  const [chatOpen, { open: openChat, close: closeChat }] = useDisclosure(false)
 
   const { pathname } = useLocation()
   const onBuild = pathname.startsWith('/build')
@@ -70,6 +72,18 @@ export function Layout() {
                 {mobileSearchOpen ? <IconX size={18} /> : <IconSearch size={18} />}
               </ActionIcon>
             )}
+            {/* Mobile chat trigger lives in the header; a floating bubble would
+                stack on the sticky build bar and cover grid content. */}
+            <ActionIcon
+              hiddenFrom="sm"
+              variant="gradient"
+              gradient={{ from: 'violet', to: 'grape', deg: 135 }}
+              size="lg"
+              aria-label="Open support chat"
+              onClick={openChat}
+            >
+              <IconMessageCircle size={18} />
+            </ActionIcon>
             <Button
               component={Link}
               to={cta.to}
@@ -152,6 +166,8 @@ export function Layout() {
             </Box>
           </>
         )}
+
+        <ChatWidget opened={chatOpen} onOpen={openChat} onClose={closeChat} />
       </AppShell.Main>
     </AppShell>
   )

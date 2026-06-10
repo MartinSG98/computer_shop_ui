@@ -1,0 +1,61 @@
+/* Floating trigger (desktop only; mobile opens chat from the header). */
+.fab {
+  position: fixed;
+  right: var(--mantine-spacing-md);
+  bottom: var(--mantine-spacing-md);
+  z-index: 200;
+}
+
+/* Desktop chat panel, anchored above the trigger. */
+.panel {
+  position: fixed;
+  right: var(--mantine-spacing-md);
+  bottom: 84px;
+  z-index: 200;
+  width: 380px;
+  height: min(560px, calc(100vh - 120px));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.messages {
+  flex: 1;
+}
+
+/* A message plus its optional action chip, aligned to the bubble's side. */
+.messageGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.messageGroup[data-role='user'] {
+  align-items: flex-end;
+}
+
+.messageGroup[data-role='assistant'] {
+  align-items: flex-start;
+}
+
+.bubble {
+  max-width: 85%;
+  padding: 8px 12px;
+  border-radius: var(--mantine-radius-lg);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.user {
+  align-self: flex-end;
+  background: var(--mantine-color-violet-filled);
+  color: var(--mantine-color-white);
+  border-bottom-right-radius: var(--mantine-radius-xs);
+}
+
+.assistant {
+  align-self: flex-start;
+  background: var(--mantine-color-default);
+  border: 1px solid var(--mantine-color-default-border);
+  border-bottom-left-radius: var(--mantine-radius-xs);
+}
