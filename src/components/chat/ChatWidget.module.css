@@ -23,6 +23,21 @@
   flex: 1;
 }
 
+/* A message plus its optional action chip, aligned to the bubble's side. */
+.messageGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.messageGroup[data-role='user'] {
+  align-items: flex-end;
+}
+
+.messageGroup[data-role='assistant'] {
+  align-items: flex-start;
+}
+
 .bubble {
   max-width: 85%;
   padding: 8px 12px;
