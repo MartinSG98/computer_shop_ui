@@ -61,8 +61,9 @@ function ChatPanel({ messages, input, pending, onInputChange, onSend, onClose }:
                 {message.text}
               </Text>
               {/* The agent says the page is "top right of the screen", which is
-                  wrong on mobile; a tappable chip is right everywhere. */}
-              {message.role === 'assistant' && /build a pc/i.test(message.text) && (
+                  wrong on mobile; a tappable chip is right everywhere. \s+ rather
+                  than literal spaces: some models emit non-breaking spaces. */}
+              {message.role === 'assistant' && /build\s+a\s+pc/i.test(message.text) && (
                 <Button
                   component={Link}
                   to="/build"
