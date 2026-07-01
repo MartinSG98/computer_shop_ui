@@ -1,5 +1,6 @@
 import {
   ActionIcon,
+  Alert,
   Button,
   Divider,
   Drawer,
@@ -8,16 +9,50 @@ import {
   Indicator,
   Stack,
   Text,
+  ThemeIcon,
 } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
-import { IconMinus, IconPlus, IconShoppingCart, IconTrash } from '@tabler/icons-react'
+import { IconCheck, IconMinus, IconPlus, IconShoppingCart, IconTrash } from '@tabler/icons-react'
+import { useState } from 'react'
+import { ApiError, createOrder } from '../api/client'
+import type { Order } from '../api/types'
+import { useAuth } from '../context/auth-context'
 import { useCart } from '../context/cart-context'
 import { formatPrice } from '../lib/format'
 
 export function Cart() {
   const [opened, { open, close }] = useDisclosure(false)
-  const { items, itemCount, totalPrice, setQuantity, removeItem } = useCart()
+  const { items, itemCount, totalPrice, setQuantity, removeItem, clear } = useCart()
+  const { username } = useAuth()
   const currency = items[0]?.product.currency ?? 'USD'
+
+  const [placing, setPlacing] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [placedOrder, setPlacedOrder] = useState<Order | null>(null)
+
+  const handleCheckout = async () => {
+    setPlacing(true)
+    setError(null)
+    try {
+      const order = await createOrder(
+        items.map((item) => ({ product_id: item.product.id, quantity: item.quantity })),
+        username,
+      )
+      setPlacedOrder(order)
+      clear()
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Checkout failed')
+    } finally {
+      setPlacing(false)
+    }
+  }
+
+  // Reset the confirmation/error on dismiss, so reopening shows the live cart.
+  const handleClose = () => {
+    close()
+    setPlacedOrder(null)
+    setError(null)
+  }
 
   return (
     <>
@@ -27,8 +62,24 @@ export function Cart() {
         </ActionIcon>
       </Indicator>
 
-      <Drawer opened={opened} onClose={close} position="right" title="Your cart" size="md">
-        {items.length === 0 ? (
+      <Drawer opened={opened} onClose={handleClose} position="right" title="Your cart" size="md">
+        {placedOrder ? (
+          <Stack align="center" py="xl" gap="md">
+            <ThemeIcon size={56} radius="xl" color="teal" variant="light">
+              <IconCheck size={32} />
+            </ThemeIcon>
+            <Text fw={700} size="lg">
+              Order placed
+            </Text>
+            <Text c="dimmed" ta="center">
+              Thanks{username ? `, ${username}` : ''}! Order {placedOrder.id} for{' '}
+              {formatPrice(placedOrder.total, placedOrder.currency)} is confirmed.
+            </Text>
+            <Button variant="light" onClick={handleClose}>
+              Continue shopping
+            </Button>
+          </Stack>
+        ) : items.length === 0 ? (
           <Text c="dimmed" ta="center" py="xl">
             Your cart is empty.
           </Text>
@@ -90,8 +141,12 @@ export function Cart() {
                 {formatPrice(totalPrice.toFixed(2), currency)}
               </Text>
             </Group>
-            {/* Checkout is intentionally disabled — wired up later. */}
-            <Button fullWidth disabled>
+            {error && (
+              <Alert color="red" title="Checkout failed" variant="light">
+                {error}
+              </Alert>
+            )}
+            <Button fullWidth onClick={handleCheckout} loading={placing}>
               Checkout
             </Button>
           </Stack>
