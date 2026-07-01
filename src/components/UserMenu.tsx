@@ -1,5 +1,6 @@
 import { ActionIcon, Menu, Stack, Text } from '@mantine/core'
-import { IconCheck, IconUser, IconUserShield } from '@tabler/icons-react'
+import { IconCheck, IconLayoutDashboard, IconUser, IconUserShield } from '@tabler/icons-react'
+import { Link } from 'react-router-dom'
 import type { Role } from '../auth/cognito'
 import { useAuth } from '../context/auth-context'
 
@@ -46,6 +47,19 @@ export function UserMenu() {
             </Stack>
           </Menu.Item>
         ))}
+
+        {isAdmin && (
+          <>
+            <Menu.Divider />
+            <Menu.Item
+              component={Link}
+              to="/admin"
+              leftSection={<IconLayoutDashboard size={16} />}
+            >
+              Admin dashboard
+            </Menu.Item>
+          </>
+        )}
       </Menu.Dropdown>
     </Menu>
   )
