@@ -117,46 +117,6 @@ export function AdminPage() {
             <Kpi label="Units sold" value={String(overview.summary.units_sold)} />
           </SimpleGrid>
 
-          <Paper withBorder p="md" radius="md">
-            <Text fw={700} mb="sm">
-              Sales over time
-            </Text>
-            {overview.sales_over_time.length === 0 ? (
-              <Text c="dimmed">No sales yet.</Text>
-            ) : (
-              <>
-                <Table>
-                  <Table.Thead>
-                    <Table.Tr>
-                      <Table.Th>Date</Table.Th>
-                      <Table.Th>Orders</Table.Th>
-                      <Table.Th>Revenue</Table.Th>
-                    </Table.Tr>
-                  </Table.Thead>
-                  <Table.Tbody>
-                    {salesRows.map((day) => (
-                      <Table.Tr key={day.date}>
-                        <Table.Td>{day.date}</Table.Td>
-                        <Table.Td>{day.orders}</Table.Td>
-                        <Table.Td>{formatPrice(day.revenue, USD)}</Table.Td>
-                      </Table.Tr>
-                    ))}
-                  </Table.Tbody>
-                </Table>
-                {salesPageCount > 1 && (
-                  <Group justify="flex-end" mt="sm">
-                    <Pagination
-                      total={salesPageCount}
-                      value={salesPage}
-                      onChange={setSalesPage}
-                      size="sm"
-                    />
-                  </Group>
-                )}
-              </>
-            )}
-          </Paper>
-
           <SimpleGrid cols={{ base: 1, md: 2 }}>
             <Paper withBorder p="md" radius="md">
               <Text fw={700} mb="sm">
@@ -213,6 +173,46 @@ export function AdminPage() {
               )}
             </Paper>
           </SimpleGrid>
+
+          <Paper withBorder p="md" radius="md">
+            <Text fw={700} mb="sm">
+              Sales over time
+            </Text>
+            {overview.sales_over_time.length === 0 ? (
+              <Text c="dimmed">No sales yet.</Text>
+            ) : (
+              <>
+                <Table>
+                  <Table.Thead>
+                    <Table.Tr>
+                      <Table.Th>Date</Table.Th>
+                      <Table.Th>Orders</Table.Th>
+                      <Table.Th>Revenue</Table.Th>
+                    </Table.Tr>
+                  </Table.Thead>
+                  <Table.Tbody>
+                    {salesRows.map((day) => (
+                      <Table.Tr key={day.date}>
+                        <Table.Td>{day.date}</Table.Td>
+                        <Table.Td>{day.orders}</Table.Td>
+                        <Table.Td>{formatPrice(day.revenue, USD)}</Table.Td>
+                      </Table.Tr>
+                    ))}
+                  </Table.Tbody>
+                </Table>
+                {salesPageCount > 1 && (
+                  <Group justify="flex-end" mt="sm">
+                    <Pagination
+                      total={salesPageCount}
+                      value={salesPage}
+                      onChange={setSalesPage}
+                      size="sm"
+                    />
+                  </Group>
+                )}
+              </>
+            )}
+          </Paper>
 
           <Paper withBorder p="md" radius="md">
             <Text fw={700} mb="sm">
