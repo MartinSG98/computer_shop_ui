@@ -7,6 +7,7 @@ import {
   Pagination,
   Paper,
   Progress,
+  Select,
   SimpleGrid,
   Stack,
   Table,
@@ -23,6 +24,22 @@ import { formatPrice } from '../lib/format'
 // The admin metrics don't carry a currency; the shop is single-currency USD.
 const USD = 'USD'
 const PAGE_SIZE = 10
+
+const PERIODS = [
+  { value: 'all', label: 'All time' },
+  { value: '7', label: 'Last 7 days' },
+  { value: '30', label: 'Last 30 days' },
+  { value: '90', label: 'Last 90 days' },
+]
+
+// Inclusive lower-bound date (YYYY-MM-DD) for a period, or null for "all time".
+// Date strings compare correctly with >=, so no Date parsing is needed at use.
+function cutoffDate(period: string): string | null {
+  if (period === 'all') return null
+  const d = new Date()
+  d.setDate(d.getDate() - Number(period))
+  return d.toISOString().slice(0, 10)
+}
 
 function Kpi({ label, value }: { label: string; value: string }) {
   return (
@@ -49,6 +66,8 @@ export function AdminPage() {
   const [error, setError] = useState<string | null>(null)
   const [salesPage, setSalesPage] = useState(1)
   const [ordersPage, setOrdersPage] = useState(1)
+  const [salesPeriod, setSalesPeriod] = useState('all')
+  const [ordersPeriod, setOrdersPeriod] = useState('all')
 
   useEffect(() => {
     if (!isAdmin || !idToken) return
@@ -87,12 +106,29 @@ export function AdminPage() {
   }
 
   const topUnits = overview?.top_products[0]?.units ?? 0
-  const salesPageCount = overview ? Math.ceil(overview.sales_over_time.length / PAGE_SIZE) : 0
-  const salesRows = overview
-    ? overview.sales_over_time.slice((salesPage - 1) * PAGE_SIZE, salesPage * PAGE_SIZE)
-    : []
-  const ordersPageCount = Math.ceil(orders.length / PAGE_SIZE)
-  const orderRows = orders.slice((ordersPage - 1) * PAGE_SIZE, ordersPage * PAGE_SIZE)
+
+  const salesCutoff = cutoffDate(salesPeriod)
+  const filteredSales = (overview?.sales_over_time ?? []).filter(
+    (day) => !salesCutoff || day.date >= salesCutoff,
+  )
+  const salesPageCount = Math.ceil(filteredSales.length / PAGE_SIZE)
+  const salesRows = filteredSales.slice((salesPage - 1) * PAGE_SIZE, salesPage * PAGE_SIZE)
+
+  const ordersCutoff = cutoffDate(ordersPeriod)
+  const filteredOrders = orders.filter(
+    (order) => !ordersCutoff || order.created_at.slice(0, 10) >= ordersCutoff,
+  )
+  const ordersPageCount = Math.ceil(filteredOrders.length / PAGE_SIZE)
+  const orderRows = filteredOrders.slice((ordersPage - 1) * PAGE_SIZE, ordersPage * PAGE_SIZE)
+
+  const onSalesPeriod = (value: string | null) => {
+    setSalesPeriod(value ?? 'all')
+    setSalesPage(1)
+  }
+  const onOrdersPeriod = (value: string | null) => {
+    setOrdersPeriod(value ?? 'all')
+    setOrdersPage(1)
+  }
 
   return (
     <Container size="lg" py="xl">
@@ -175,11 +211,20 @@ export function AdminPage() {
           </SimpleGrid>
 
           <Paper withBorder p="md" radius="md">
-            <Text fw={700} mb="sm">
-              Sales over time
-            </Text>
-            {overview.sales_over_time.length === 0 ? (
-              <Text c="dimmed">No sales yet.</Text>
+            <Group justify="space-between" mb="sm">
+              <Text fw={700}>Sales over time</Text>
+              <Select
+                data={PERIODS}
+                value={salesPeriod}
+                onChange={onSalesPeriod}
+                size="xs"
+                w={140}
+                allowDeselect={false}
+                aria-label="Sales over time period"
+              />
+            </Group>
+            {filteredSales.length === 0 ? (
+              <Text c="dimmed">No sales in this period.</Text>
             ) : (
               <>
                 <Table>
@@ -215,11 +260,20 @@ export function AdminPage() {
           </Paper>
 
           <Paper withBorder p="md" radius="md">
-            <Text fw={700} mb="sm">
-              Recent orders
-            </Text>
-            {orders.length === 0 ? (
-              <Text c="dimmed">No orders yet.</Text>
+            <Group justify="space-between" mb="sm">
+              <Text fw={700}>Recent orders</Text>
+              <Select
+                data={PERIODS}
+                value={ordersPeriod}
+                onChange={onOrdersPeriod}
+                size="xs"
+                w={140}
+                allowDeselect={false}
+                aria-label="Recent orders period"
+              />
+            </Group>
+            {filteredOrders.length === 0 ? (
+              <Text c="dimmed">No orders in this period.</Text>
             ) : (
               <>
                 <Table>
