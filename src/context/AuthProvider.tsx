@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { setAuthToken } from '../api/client'
 import { authenticate, demoAccounts, type Role } from '../auth/cognito'
 import { AuthContext, type AuthState } from './auth-context'
 
@@ -32,6 +33,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     void switchTo('normal')
   }, [switchTo])
+
+  // Keep the API client's bearer token in sync with the current session.
+  useEffect(() => {
+    setAuthToken(idToken)
+  }, [idToken])
 
   const value = useMemo<AuthState>(
     () => ({
