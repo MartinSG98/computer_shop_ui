@@ -14,6 +14,7 @@ import {
   Text,
   Title,
 } from '@mantine/core'
+import { AreaChart } from '@mantine/charts'
 import { useEffect, useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { ApiError, getAdminOrders, getAdminOverview } from '../api/client'
@@ -113,6 +114,8 @@ export function AdminPage() {
   )
   const salesPageCount = Math.ceil(filteredSales.length / PAGE_SIZE)
   const salesRows = filteredSales.slice((salesPage - 1) * PAGE_SIZE, salesPage * PAGE_SIZE)
+  // Chart uses the full filtered range (ascending by date), not just one page.
+  const salesChartData = filteredSales.map((day) => ({ date: day.date, Revenue: Number(day.revenue) }))
 
   const ordersCutoff = cutoffDate(ordersPeriod)
   const filteredOrders = orders.filter(
@@ -227,6 +230,21 @@ export function AdminPage() {
               <Text c="dimmed">No sales in this period.</Text>
             ) : (
               <>
+                <AreaChart
+                  h={260}
+                  mb="md"
+                  data={salesChartData}
+                  dataKey="date"
+                  series={[{ name: 'Revenue', color: 'violet.6' }]}
+                  valueFormatter={(value) => formatPrice(String(value), USD)}
+                  curveType="monotone"
+                  withDots={false}
+                  // Inset the whole plot (gridlines included) from the card edge.
+                  // Chart margin is the lever for this; xAxis padding only moves
+                  // the data points, not the gridlines that were hitting the border.
+                  areaChartProps={{ margin: { top: 10, right: 24, bottom: 0, left: 0 } }}
+                  xAxisProps={{ padding: { left: 8, right: 8 } }}
+                />
                 <Table>
                   <Table.Thead>
                     <Table.Tr>
