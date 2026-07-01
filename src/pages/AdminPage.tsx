@@ -2,7 +2,9 @@ import {
   Alert,
   Center,
   Container,
+  Group,
   Loader,
+  Pagination,
   Paper,
   Progress,
   SimpleGrid,
@@ -20,6 +22,7 @@ import { formatPrice } from '../lib/format'
 
 // The admin metrics don't carry a currency; the shop is single-currency USD.
 const USD = 'USD'
+const PAGE_SIZE = 10
 
 function Kpi({ label, value }: { label: string; value: string }) {
   return (
@@ -44,6 +47,8 @@ export function AdminPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [salesPage, setSalesPage] = useState(1)
+  const [ordersPage, setOrdersPage] = useState(1)
 
   useEffect(() => {
     if (!isAdmin || !idToken) return
@@ -82,6 +87,12 @@ export function AdminPage() {
   }
 
   const topUnits = overview?.top_products[0]?.units ?? 0
+  const salesPageCount = overview ? Math.ceil(overview.sales_over_time.length / PAGE_SIZE) : 0
+  const salesRows = overview
+    ? overview.sales_over_time.slice((salesPage - 1) * PAGE_SIZE, salesPage * PAGE_SIZE)
+    : []
+  const ordersPageCount = Math.ceil(orders.length / PAGE_SIZE)
+  const orderRows = orders.slice((ordersPage - 1) * PAGE_SIZE, ordersPage * PAGE_SIZE)
 
   return (
     <Container size="lg" py="xl">
@@ -113,24 +124,36 @@ export function AdminPage() {
             {overview.sales_over_time.length === 0 ? (
               <Text c="dimmed">No sales yet.</Text>
             ) : (
-              <Table>
-                <Table.Thead>
-                  <Table.Tr>
-                    <Table.Th>Date</Table.Th>
-                    <Table.Th>Orders</Table.Th>
-                    <Table.Th>Revenue</Table.Th>
-                  </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>
-                  {overview.sales_over_time.map((day) => (
-                    <Table.Tr key={day.date}>
-                      <Table.Td>{day.date}</Table.Td>
-                      <Table.Td>{day.orders}</Table.Td>
-                      <Table.Td>{formatPrice(day.revenue, USD)}</Table.Td>
+              <>
+                <Table>
+                  <Table.Thead>
+                    <Table.Tr>
+                      <Table.Th>Date</Table.Th>
+                      <Table.Th>Orders</Table.Th>
+                      <Table.Th>Revenue</Table.Th>
                     </Table.Tr>
-                  ))}
-                </Table.Tbody>
-              </Table>
+                  </Table.Thead>
+                  <Table.Tbody>
+                    {salesRows.map((day) => (
+                      <Table.Tr key={day.date}>
+                        <Table.Td>{day.date}</Table.Td>
+                        <Table.Td>{day.orders}</Table.Td>
+                        <Table.Td>{formatPrice(day.revenue, USD)}</Table.Td>
+                      </Table.Tr>
+                    ))}
+                  </Table.Tbody>
+                </Table>
+                {salesPageCount > 1 && (
+                  <Group justify="flex-end" mt="sm">
+                    <Pagination
+                      total={salesPageCount}
+                      value={salesPage}
+                      onChange={setSalesPage}
+                      size="sm"
+                    />
+                  </Group>
+                )}
+              </>
             )}
           </Paper>
 
@@ -198,28 +221,40 @@ export function AdminPage() {
             {orders.length === 0 ? (
               <Text c="dimmed">No orders yet.</Text>
             ) : (
-              <Table>
-                <Table.Thead>
-                  <Table.Tr>
-                    <Table.Th>Order</Table.Th>
-                    <Table.Th>Date</Table.Th>
-                    <Table.Th>Customer</Table.Th>
-                    <Table.Th>Items</Table.Th>
-                    <Table.Th>Total</Table.Th>
-                  </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>
-                  {orders.map((order) => (
-                    <Table.Tr key={order.id}>
-                      <Table.Td>{order.id}</Table.Td>
-                      <Table.Td>{order.created_at.slice(0, 10)}</Table.Td>
-                      <Table.Td>{order.username ?? '—'}</Table.Td>
-                      <Table.Td>{unitsInOrder(order)}</Table.Td>
-                      <Table.Td>{formatPrice(order.total, order.currency)}</Table.Td>
+              <>
+                <Table>
+                  <Table.Thead>
+                    <Table.Tr>
+                      <Table.Th>Order</Table.Th>
+                      <Table.Th>Date</Table.Th>
+                      <Table.Th>Customer</Table.Th>
+                      <Table.Th>Items</Table.Th>
+                      <Table.Th>Total</Table.Th>
                     </Table.Tr>
-                  ))}
-                </Table.Tbody>
-              </Table>
+                  </Table.Thead>
+                  <Table.Tbody>
+                    {orderRows.map((order) => (
+                      <Table.Tr key={order.id}>
+                        <Table.Td>{order.id}</Table.Td>
+                        <Table.Td>{order.created_at.slice(0, 10)}</Table.Td>
+                        <Table.Td>{order.username ?? '—'}</Table.Td>
+                        <Table.Td>{unitsInOrder(order)}</Table.Td>
+                        <Table.Td>{formatPrice(order.total, order.currency)}</Table.Td>
+                      </Table.Tr>
+                    ))}
+                  </Table.Tbody>
+                </Table>
+                {ordersPageCount > 1 && (
+                  <Group justify="flex-end" mt="sm">
+                    <Pagination
+                      total={ordersPageCount}
+                      value={ordersPage}
+                      onChange={setOrdersPage}
+                      size="sm"
+                    />
+                  </Group>
+                )}
+              </>
             )}
           </Paper>
         </Stack>
