@@ -1,7 +1,7 @@
 # Computer Shop UI - https://dxxggszhxub5x.cloudfront.net or msg-computers.com
 
 React + Vite + TypeScript + Mantine frontend for the Computer Shop. It uses
-react-router for two pages:
+react-router for three routes:
 
 - **Shop** (`/`): loads the assortment and categories from the API on startup,
   with category, brand, and per-category attribute filters (for example CPU
@@ -19,18 +19,48 @@ react-router for two pages:
   speedometer gauge, alongside catalog grounded improvement suggestions. The
   finished build adds to the cart, and is saved in localStorage so it survives
   navigation and reload.
+- **Admin dashboard** (`/admin`): a Cognito-gated sales dashboard for the admin
+  account. KPI cards, a revenue trend chart, top products, sales by category, top
+  customers, sales over time, and recent orders. A single period control (all
+  time / 7 / 30 / 90 days) filters the whole dashboard, tables paginate, and
+  clicking a recent order opens a drawer with its line items.
 
 Compatibility and tips are driven by typed `attributes` and a `tier` on each
 build-category product, served by the API. The per-category attribute filters
 used by both the shop and the picker are defined in `src/lib/filters.ts`, so
 adding a filter for another category is a single config entry.
 
+## Accounts and admin area
+
+The app signs in silently to a Cognito demo account. It loads as **user-normal**
+(a regular shopper); the header user-icon menu switches to **user-admin**, which
+unlocks the admin dashboard. Switching signs in without a form, and the Cognito
+**ID token** is sent as the bearer on order and admin requests.
+
+- **Checkout** (`POST /orders`) is public; the cart posts the order and shows an
+  inline confirmation.
+- **`/admin`** is gated both ways: the route redirects non-admins, and the API
+  rejects admin calls that lack the admins-group token.
+- The two demo accounts and the Cognito config default to the deployed pool's
+  live values, so the app runs out of the box. These are throwaway demo logins
+  with no real power; override per environment with the `VITE_*` variables below.
+
 ## Develop
 
 ```bash
 npm install
-npm run dev   # API defaults to http://127.0.0.1:8000; override with VITE_API_BASE_URL
+npm run dev   # runs with no config; env vars below override the defaults
 ```
+
+All build-time env vars are optional (each defaults to the deployed resource):
+
+| Variable | Purpose |
+| --- | --- |
+| `VITE_API_BASE_URL` | API base URL (defaults to `http://127.0.0.1:8000`) |
+| `VITE_COGNITO_USER_POOL_ID` | Cognito user pool id |
+| `VITE_COGNITO_CLIENT_ID` | Cognito app client id (also the JWT audience) |
+| `VITE_DEMO_NORMAL_USERNAME` / `VITE_DEMO_NORMAL_PASSWORD` | user-normal demo login |
+| `VITE_DEMO_ADMIN_USERNAME` / `VITE_DEMO_ADMIN_PASSWORD` | user-admin demo login |
 
 ## Deploy (CI)
 
