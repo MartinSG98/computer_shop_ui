@@ -78,3 +78,64 @@ export interface EvaluateResult {
 export interface ChatReply {
   reply: string
 }
+
+/** One line of a checkout request (POST /orders). Price is resolved server-side. */
+export interface OrderItemIn {
+  product_id: string
+  quantity: number
+}
+
+/** A stored order line. Decimals are serialized as strings by the API. */
+export interface OrderLineItem {
+  product_id: string
+  name: string
+  category: string
+  unit_price: string
+  quantity: number
+  line_total: string
+}
+
+/** An order, as returned by POST /orders and the admin endpoints. */
+export interface Order {
+  id: string
+  username: string | null
+  created_at: string
+  currency: string
+  total: string
+  items: OrderLineItem[]
+}
+
+/** Headline KPIs for the admin dashboard. */
+export interface SalesSummary {
+  order_count: number
+  total_revenue: string
+  average_order_value: string
+  units_sold: number
+}
+
+export interface SalesByDay {
+  date: string
+  revenue: string
+  orders: number
+}
+
+export interface TopProduct {
+  product_id: string
+  name: string
+  units: number
+  revenue: string
+}
+
+export interface SalesByCategory {
+  category: string
+  units: number
+  revenue: string
+}
+
+/** Response from GET /admin/overview. */
+export interface AdminOverview {
+  summary: SalesSummary
+  sales_over_time: SalesByDay[]
+  top_products: TopProduct[]
+  sales_by_category: SalesByCategory[]
+}

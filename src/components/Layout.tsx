@@ -5,6 +5,7 @@ import { Link, Outlet, useLocation } from 'react-router-dom'
 import { Cart } from './Cart'
 import { ChatWidget } from './chat/ChatWidget'
 import { ColorSchemeToggle } from './ColorSchemeToggle'
+import { UserMenu } from './UserMenu'
 import { useShop } from '../context/shop-context'
 
 export function Layout() {
@@ -110,6 +111,7 @@ export function Layout() {
               </ActionIcon>
             )}
             <Cart />
+            <UserMenu />
             <ColorSchemeToggle />
           </Group>
         </Group>

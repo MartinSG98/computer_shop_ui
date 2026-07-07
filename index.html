@@ -2,6 +2,12 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <!-- amazon-cognito-identity-js pulls in the `buffer` polyfill, which reads
+         Node's `global` at load time. Define it before any module runs so the
+         app doesn't crash to a white screen in the browser. -->
+    <script>
+      window.global = window
+    </script>
     <link rel="icon" type="image/png" href="/msg_favicon.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
