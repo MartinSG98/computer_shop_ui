@@ -2,6 +2,8 @@ import {
   Alert,
   Center,
   Container,
+  Divider,
+  Drawer,
   Group,
   Loader,
   Pagination,
@@ -70,6 +72,7 @@ export function AdminPage() {
   // Dashboard-level window driving the KPI cards and the sales-over-time section.
   const [period, setPeriod] = useState('all')
   const [ordersPeriod, setOrdersPeriod] = useState('all')
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
 
   useEffect(() => {
     if (!isAdmin || !idToken) return
@@ -374,7 +377,7 @@ export function AdminPage() {
               <Text c="dimmed">No orders in this period.</Text>
             ) : (
               <>
-                <Table>
+                <Table highlightOnHover>
                   <Table.Thead>
                     <Table.Tr>
                       <Table.Th>Order</Table.Th>
@@ -386,7 +389,11 @@ export function AdminPage() {
                   </Table.Thead>
                   <Table.Tbody>
                     {orderRows.map((order) => (
-                      <Table.Tr key={order.id}>
+                      <Table.Tr
+                        key={order.id}
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => setSelectedOrder(order)}
+                      >
                         <Table.Td>{order.id}</Table.Td>
                         <Table.Td>{order.created_at.slice(0, 10)}</Table.Td>
                         <Table.Td>{order.username ?? '—'}</Table.Td>
@@ -411,6 +418,57 @@ export function AdminPage() {
           </Paper>
         </Stack>
       ) : null}
+
+      <Drawer
+        opened={selectedOrder !== null}
+        onClose={() => setSelectedOrder(null)}
+        position="right"
+        size="md"
+        title={selectedOrder ? `Order ${selectedOrder.id}` : ''}
+      >
+        {selectedOrder && (
+          <Stack>
+            <Group justify="space-between">
+              <Text size="sm" c="dimmed">
+                Placed
+              </Text>
+              <Text size="sm">{selectedOrder.created_at.slice(0, 10)}</Text>
+            </Group>
+            <Group justify="space-between">
+              <Text size="sm" c="dimmed">
+                Customer
+              </Text>
+              <Text size="sm">{selectedOrder.username ?? '—'}</Text>
+            </Group>
+            <Divider />
+            <Table>
+              <Table.Thead>
+                <Table.Tr>
+                  <Table.Th>Product</Table.Th>
+                  <Table.Th>Qty</Table.Th>
+                  <Table.Th>Unit</Table.Th>
+                  <Table.Th>Total</Table.Th>
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>
+                {selectedOrder.items.map((item) => (
+                  <Table.Tr key={item.product_id}>
+                    <Table.Td>{item.name}</Table.Td>
+                    <Table.Td>{item.quantity}</Table.Td>
+                    <Table.Td>{formatPrice(item.unit_price, USD)}</Table.Td>
+                    <Table.Td>{formatPrice(item.line_total, USD)}</Table.Td>
+                  </Table.Tr>
+                ))}
+              </Table.Tbody>
+            </Table>
+            <Divider />
+            <Group justify="space-between">
+              <Text fw={700}>Total</Text>
+              <Text fw={700}>{formatPrice(selectedOrder.total, selectedOrder.currency)}</Text>
+            </Group>
+          </Stack>
+        )}
+      </Drawer>
     </Container>
   )
 }
