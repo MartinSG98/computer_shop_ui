@@ -50,7 +50,7 @@ function Kpi({ label, value }: { label: string; value: string }) {
       <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
         {label}
       </Text>
-      <Text fw={700} fz="xl">
+      <Text fw={700} fz={{ base: 'lg', sm: 'xl' }} style={{ overflowWrap: 'anywhere' }}>
         {value}
       </Text>
     </Paper>
