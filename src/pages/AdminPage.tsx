@@ -107,8 +107,6 @@ export function AdminPage() {
     return <Navigate to="/" replace />
   }
 
-  const topUnits = overview?.top_products[0]?.units ?? 0
-
   const periodCutoff = cutoffDate(period)
   const filteredSales = (overview?.sales_over_time ?? []).filter(
     (day) => !periodCutoff || day.date >= periodCutoff,
@@ -120,6 +118,42 @@ export function AdminPage() {
   const kpiRevenue = periodOrders.reduce((sum, order) => sum + Number(order.total), 0)
   const kpiUnits = periodOrders.reduce((sum, order) => sum + unitsInOrder(order), 0)
   const kpiAvg = periodOrders.length ? kpiRevenue / periodOrders.length : 0
+
+  // Top products and category breakdown, recomputed from the orders in the
+  // selected window so the whole dashboard reflects the same period.
+  const productAgg = new Map<
+    string,
+    { product_id: string; name: string; units: number; revenue: number }
+  >()
+  const categoryAgg = new Map<string, { category: string; units: number; revenue: number }>()
+  for (const order of periodOrders) {
+    for (const item of order.items) {
+      const lineRevenue = Number(item.line_total)
+      const product = productAgg.get(item.product_id) ?? {
+        product_id: item.product_id,
+        name: item.name,
+        units: 0,
+        revenue: 0,
+      }
+      product.units += item.quantity
+      product.revenue += lineRevenue
+      product.name = item.name
+      productAgg.set(item.product_id, product)
+      const category = categoryAgg.get(item.category) ?? {
+        category: item.category,
+        units: 0,
+        revenue: 0,
+      }
+      category.units += item.quantity
+      category.revenue += lineRevenue
+      categoryAgg.set(item.category, category)
+    }
+  }
+  const topProducts = [...productAgg.values()]
+    .sort((a, b) => b.units - a.units || b.revenue - a.revenue)
+    .slice(0, 10)
+  const salesByCategory = [...categoryAgg.values()].sort((a, b) => b.revenue - a.revenue)
+  const topUnits = topProducts[0]?.units ?? 0
   const salesPageCount = Math.ceil(filteredSales.length / PAGE_SIZE)
   const salesRows = filteredSales.slice((salesPage - 1) * PAGE_SIZE, salesPage * PAGE_SIZE)
   // Chart uses the full filtered range (ascending by date), not just one page.
@@ -177,11 +211,11 @@ export function AdminPage() {
               <Text fw={700} mb="sm">
                 Top products
               </Text>
-              {overview.top_products.length === 0 ? (
-                <Text c="dimmed">No sales yet.</Text>
+              {topProducts.length === 0 ? (
+                <Text c="dimmed">No sales in this period.</Text>
               ) : (
                 <Stack gap="sm">
-                  {overview.top_products.map((product) => (
+                  {topProducts.map((product) => (
                     <div key={product.product_id}>
                       <Text size="sm" fw={500} lineClamp={1}>
                         {product.name}
@@ -192,7 +226,7 @@ export function AdminPage() {
                         mb={4}
                       />
                       <Text size="xs" c="dimmed">
-                        {product.units} sold · {formatPrice(product.revenue, USD)}
+                        {product.units} sold · {formatPrice(String(product.revenue), USD)}
                       </Text>
                     </div>
                   ))}
@@ -204,8 +238,8 @@ export function AdminPage() {
               <Text fw={700} mb="sm">
                 Sales by category
               </Text>
-              {overview.sales_by_category.length === 0 ? (
-                <Text c="dimmed">No sales yet.</Text>
+              {salesByCategory.length === 0 ? (
+                <Text c="dimmed">No sales in this period.</Text>
               ) : (
                 <Table>
                   <Table.Thead>
@@ -216,11 +250,11 @@ export function AdminPage() {
                     </Table.Tr>
                   </Table.Thead>
                   <Table.Tbody>
-                    {overview.sales_by_category.map((category) => (
+                    {salesByCategory.map((category) => (
                       <Table.Tr key={category.category}>
                         <Table.Td>{category.category}</Table.Td>
                         <Table.Td>{category.units}</Table.Td>
-                        <Table.Td>{formatPrice(category.revenue, USD)}</Table.Td>
+                        <Table.Td>{formatPrice(String(category.revenue), USD)}</Table.Td>
                       </Table.Tr>
                     ))}
                   </Table.Tbody>
