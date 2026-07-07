@@ -67,7 +67,8 @@ export function AdminPage() {
   const [error, setError] = useState<string | null>(null)
   const [salesPage, setSalesPage] = useState(1)
   const [ordersPage, setOrdersPage] = useState(1)
-  const [salesPeriod, setSalesPeriod] = useState('all')
+  // Dashboard-level window driving the KPI cards and the sales-over-time section.
+  const [period, setPeriod] = useState('all')
   const [ordersPeriod, setOrdersPeriod] = useState('all')
 
   useEffect(() => {
@@ -108,10 +109,17 @@ export function AdminPage() {
 
   const topUnits = overview?.top_products[0]?.units ?? 0
 
-  const salesCutoff = cutoffDate(salesPeriod)
+  const periodCutoff = cutoffDate(period)
   const filteredSales = (overview?.sales_over_time ?? []).filter(
-    (day) => !salesCutoff || day.date >= salesCutoff,
+    (day) => !periodCutoff || day.date >= periodCutoff,
   )
+  // KPIs are period-aware: recomputed client-side from the orders in the window.
+  const periodOrders = orders.filter(
+    (order) => !periodCutoff || order.created_at.slice(0, 10) >= periodCutoff,
+  )
+  const kpiRevenue = periodOrders.reduce((sum, order) => sum + Number(order.total), 0)
+  const kpiUnits = periodOrders.reduce((sum, order) => sum + unitsInOrder(order), 0)
+  const kpiAvg = periodOrders.length ? kpiRevenue / periodOrders.length : 0
   const salesPageCount = Math.ceil(filteredSales.length / PAGE_SIZE)
   const salesRows = filteredSales.slice((salesPage - 1) * PAGE_SIZE, salesPage * PAGE_SIZE)
   // Chart uses the full filtered range (ascending by date), not just one page.
@@ -124,8 +132,8 @@ export function AdminPage() {
   const ordersPageCount = Math.ceil(filteredOrders.length / PAGE_SIZE)
   const orderRows = filteredOrders.slice((ordersPage - 1) * PAGE_SIZE, ordersPage * PAGE_SIZE)
 
-  const onSalesPeriod = (value: string | null) => {
-    setSalesPeriod(value ?? 'all')
+  const onPeriod = (value: string | null) => {
+    setPeriod(value ?? 'all')
     setSalesPage(1)
   }
   const onOrdersPeriod = (value: string | null) => {
@@ -135,9 +143,17 @@ export function AdminPage() {
 
   return (
     <Container size="lg" py="xl">
-      <Title order={2} mb="lg">
-        Admin dashboard
-      </Title>
+      <Group justify="space-between" mb="lg">
+        <Title order={2}>Admin dashboard</Title>
+        <Select
+          data={PERIODS}
+          value={period}
+          onChange={onPeriod}
+          allowDeselect={false}
+          w={150}
+          aria-label="Dashboard period"
+        />
+      </Group>
 
       {loading ? (
         <Center h={240}>
@@ -150,10 +166,10 @@ export function AdminPage() {
       ) : overview ? (
         <Stack gap="xl">
           <SimpleGrid cols={{ base: 2, sm: 4 }}>
-            <Kpi label="Revenue" value={formatPrice(overview.summary.total_revenue, USD)} />
-            <Kpi label="Orders" value={String(overview.summary.order_count)} />
-            <Kpi label="Avg order" value={formatPrice(overview.summary.average_order_value, USD)} />
-            <Kpi label="Units sold" value={String(overview.summary.units_sold)} />
+            <Kpi label="Revenue" value={formatPrice(String(kpiRevenue), USD)} />
+            <Kpi label="Orders" value={String(periodOrders.length)} />
+            <Kpi label="Avg order" value={formatPrice(String(kpiAvg), USD)} />
+            <Kpi label="Units sold" value={String(kpiUnits)} />
           </SimpleGrid>
 
           <SimpleGrid cols={{ base: 1, md: 2 }}>
@@ -214,18 +230,9 @@ export function AdminPage() {
           </SimpleGrid>
 
           <Paper withBorder p="md" radius="md">
-            <Group justify="space-between" mb="sm">
-              <Text fw={700}>Sales over time</Text>
-              <Select
-                data={PERIODS}
-                value={salesPeriod}
-                onChange={onSalesPeriod}
-                size="xs"
-                w={140}
-                allowDeselect={false}
-                aria-label="Sales over time period"
-              />
-            </Group>
+            <Text fw={700} mb="sm">
+              Sales over time
+            </Text>
             {filteredSales.length === 0 ? (
               <Text c="dimmed">No sales in this period.</Text>
             ) : (
