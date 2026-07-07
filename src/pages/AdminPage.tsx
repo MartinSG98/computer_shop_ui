@@ -154,6 +154,17 @@ export function AdminPage() {
     .slice(0, 10)
   const salesByCategory = [...categoryAgg.values()].sort((a, b) => b.revenue - a.revenue)
   const topUnits = topProducts[0]?.units ?? 0
+
+  // Customers ranked by spend in the window (order count shown alongside).
+  const customerAgg = new Map<string, { username: string; orders: number; spend: number }>()
+  for (const order of periodOrders) {
+    const key = order.username ?? '—'
+    const customer = customerAgg.get(key) ?? { username: key, orders: 0, spend: 0 }
+    customer.orders += 1
+    customer.spend += Number(order.total)
+    customerAgg.set(key, customer)
+  }
+  const topCustomers = [...customerAgg.values()].sort((a, b) => b.spend - a.spend).slice(0, 10)
   const salesPageCount = Math.ceil(filteredSales.length / PAGE_SIZE)
   const salesRows = filteredSales.slice((salesPage - 1) * PAGE_SIZE, salesPage * PAGE_SIZE)
   // Chart uses the full filtered range (ascending by date), not just one page.
@@ -262,6 +273,34 @@ export function AdminPage() {
               )}
             </Paper>
           </SimpleGrid>
+
+          <Paper withBorder p="md" radius="md">
+            <Text fw={700} mb="sm">
+              Top customers
+            </Text>
+            {topCustomers.length === 0 ? (
+              <Text c="dimmed">No customers in this period.</Text>
+            ) : (
+              <Table>
+                <Table.Thead>
+                  <Table.Tr>
+                    <Table.Th>Customer</Table.Th>
+                    <Table.Th>Orders</Table.Th>
+                    <Table.Th>Spent</Table.Th>
+                  </Table.Tr>
+                </Table.Thead>
+                <Table.Tbody>
+                  {topCustomers.map((customer) => (
+                    <Table.Tr key={customer.username}>
+                      <Table.Td>{customer.username}</Table.Td>
+                      <Table.Td>{customer.orders}</Table.Td>
+                      <Table.Td>{formatPrice(String(customer.spend), USD)}</Table.Td>
+                    </Table.Tr>
+                  ))}
+                </Table.Tbody>
+              </Table>
+            )}
+          </Paper>
 
           <Paper withBorder p="md" radius="md">
             <Text fw={700} mb="sm">
