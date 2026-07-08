@@ -15,6 +15,7 @@ export function Layout() {
 
   const { pathname } = useLocation()
   const onBuild = pathname.startsWith('/build')
+  const onAdmin = pathname.startsWith('/admin')
   // The product search only filters the shop grid, so it's hidden on /build.
   const showSearch = !onBuild
 
@@ -137,9 +138,10 @@ export function Layout() {
 
         <Outlet />
 
-        {/* Mobile-only sticky "Build a PC" CTA, on shop pages only. The spacer
-            keeps the pinned bar from covering the footer when scrolled down. */}
-        {!onBuild && (
+        {/* Mobile-only sticky "Build a PC" CTA, on the shop only (not on the
+            build page or the admin dashboard). The spacer keeps the pinned bar
+            from covering the footer when scrolled down. */}
+        {!onBuild && !onAdmin && (
           <>
             <Box hiddenFrom="sm" h={72} />
             <Box
