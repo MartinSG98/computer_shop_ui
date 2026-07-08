@@ -255,24 +255,26 @@ export function AdminPage() {
               {salesByCategory.length === 0 ? (
                 <Text c="dimmed">No sales in this period.</Text>
               ) : (
-                <Table>
-                  <Table.Thead>
-                    <Table.Tr>
-                      <Table.Th>Category</Table.Th>
-                      <Table.Th>Units</Table.Th>
-                      <Table.Th>Revenue</Table.Th>
-                    </Table.Tr>
-                  </Table.Thead>
-                  <Table.Tbody>
-                    {salesByCategory.map((category) => (
-                      <Table.Tr key={category.category}>
-                        <Table.Td>{category.category}</Table.Td>
-                        <Table.Td>{category.units}</Table.Td>
-                        <Table.Td>{formatPrice(String(category.revenue), USD)}</Table.Td>
+                <Table.ScrollContainer minWidth={340}>
+                  <Table>
+                    <Table.Thead>
+                      <Table.Tr>
+                        <Table.Th>Category</Table.Th>
+                        <Table.Th>Units</Table.Th>
+                        <Table.Th>Revenue</Table.Th>
                       </Table.Tr>
-                    ))}
-                  </Table.Tbody>
-                </Table>
+                    </Table.Thead>
+                    <Table.Tbody>
+                      {salesByCategory.map((category) => (
+                        <Table.Tr key={category.category}>
+                          <Table.Td>{category.category}</Table.Td>
+                          <Table.Td>{category.units}</Table.Td>
+                          <Table.Td>{formatPrice(String(category.revenue), USD)}</Table.Td>
+                        </Table.Tr>
+                      ))}
+                    </Table.Tbody>
+                  </Table>
+                </Table.ScrollContainer>
               )}
             </Paper>
           </SimpleGrid>
@@ -284,24 +286,26 @@ export function AdminPage() {
             {topCustomers.length === 0 ? (
               <Text c="dimmed">No customers in this period.</Text>
             ) : (
-              <Table>
-                <Table.Thead>
-                  <Table.Tr>
-                    <Table.Th>Customer</Table.Th>
-                    <Table.Th>Orders</Table.Th>
-                    <Table.Th>Spent</Table.Th>
-                  </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>
-                  {topCustomers.map((customer) => (
-                    <Table.Tr key={customer.username}>
-                      <Table.Td>{customer.username}</Table.Td>
-                      <Table.Td>{customer.orders}</Table.Td>
-                      <Table.Td>{formatPrice(String(customer.spend), USD)}</Table.Td>
+              <Table.ScrollContainer minWidth={340}>
+                <Table>
+                  <Table.Thead>
+                    <Table.Tr>
+                      <Table.Th>Customer</Table.Th>
+                      <Table.Th>Orders</Table.Th>
+                      <Table.Th>Spent</Table.Th>
                     </Table.Tr>
-                  ))}
-                </Table.Tbody>
-              </Table>
+                  </Table.Thead>
+                  <Table.Tbody>
+                    {topCustomers.map((customer) => (
+                      <Table.Tr key={customer.username}>
+                        <Table.Td>{customer.username}</Table.Td>
+                        <Table.Td>{customer.orders}</Table.Td>
+                        <Table.Td>{formatPrice(String(customer.spend), USD)}</Table.Td>
+                      </Table.Tr>
+                    ))}
+                  </Table.Tbody>
+                </Table>
+              </Table.ScrollContainer>
             )}
           </Paper>
 
@@ -328,24 +332,26 @@ export function AdminPage() {
                   areaChartProps={{ margin: { top: 10, right: 24, bottom: 0, left: 0 } }}
                   xAxisProps={{ padding: { left: 8, right: 8 } }}
                 />
-                <Table>
-                  <Table.Thead>
-                    <Table.Tr>
-                      <Table.Th>Date</Table.Th>
-                      <Table.Th>Orders</Table.Th>
-                      <Table.Th>Revenue</Table.Th>
-                    </Table.Tr>
-                  </Table.Thead>
-                  <Table.Tbody>
-                    {salesRows.map((day) => (
-                      <Table.Tr key={day.date}>
-                        <Table.Td>{day.date}</Table.Td>
-                        <Table.Td>{day.orders}</Table.Td>
-                        <Table.Td>{formatPrice(day.revenue, USD)}</Table.Td>
+                <Table.ScrollContainer minWidth={340}>
+                  <Table>
+                    <Table.Thead>
+                      <Table.Tr>
+                        <Table.Th>Date</Table.Th>
+                        <Table.Th>Orders</Table.Th>
+                        <Table.Th>Revenue</Table.Th>
                       </Table.Tr>
-                    ))}
-                  </Table.Tbody>
-                </Table>
+                    </Table.Thead>
+                    <Table.Tbody>
+                      {salesRows.map((day) => (
+                        <Table.Tr key={day.date}>
+                          <Table.Td>{day.date}</Table.Td>
+                          <Table.Td>{day.orders}</Table.Td>
+                          <Table.Td>{formatPrice(day.revenue, USD)}</Table.Td>
+                        </Table.Tr>
+                      ))}
+                    </Table.Tbody>
+                  </Table>
+                </Table.ScrollContainer>
                 {salesPageCount > 1 && (
                   <Group justify="flex-end" mt="sm">
                     <Pagination
@@ -377,32 +383,34 @@ export function AdminPage() {
               <Text c="dimmed">No orders in this period.</Text>
             ) : (
               <>
-                <Table highlightOnHover>
-                  <Table.Thead>
-                    <Table.Tr>
-                      <Table.Th>Order</Table.Th>
-                      <Table.Th>Date</Table.Th>
-                      <Table.Th>Customer</Table.Th>
-                      <Table.Th>Items</Table.Th>
-                      <Table.Th>Total</Table.Th>
-                    </Table.Tr>
-                  </Table.Thead>
-                  <Table.Tbody>
-                    {orderRows.map((order) => (
-                      <Table.Tr
-                        key={order.id}
-                        style={{ cursor: 'pointer' }}
-                        onClick={() => setSelectedOrder(order)}
-                      >
-                        <Table.Td>{order.id}</Table.Td>
-                        <Table.Td>{order.created_at.slice(0, 10)}</Table.Td>
-                        <Table.Td>{order.username ?? '—'}</Table.Td>
-                        <Table.Td>{unitsInOrder(order)}</Table.Td>
-                        <Table.Td>{formatPrice(order.total, order.currency)}</Table.Td>
+                <Table.ScrollContainer minWidth={520}>
+                  <Table highlightOnHover>
+                    <Table.Thead>
+                      <Table.Tr>
+                        <Table.Th>Order</Table.Th>
+                        <Table.Th>Date</Table.Th>
+                        <Table.Th>Customer</Table.Th>
+                        <Table.Th>Items</Table.Th>
+                        <Table.Th>Total</Table.Th>
                       </Table.Tr>
-                    ))}
-                  </Table.Tbody>
-                </Table>
+                    </Table.Thead>
+                    <Table.Tbody>
+                      {orderRows.map((order) => (
+                        <Table.Tr
+                          key={order.id}
+                          style={{ cursor: 'pointer' }}
+                          onClick={() => setSelectedOrder(order)}
+                        >
+                          <Table.Td>{order.id}</Table.Td>
+                          <Table.Td>{order.created_at.slice(0, 10)}</Table.Td>
+                          <Table.Td>{order.username ?? '—'}</Table.Td>
+                          <Table.Td>{unitsInOrder(order)}</Table.Td>
+                          <Table.Td>{formatPrice(order.total, order.currency)}</Table.Td>
+                        </Table.Tr>
+                      ))}
+                    </Table.Tbody>
+                  </Table>
+                </Table.ScrollContainer>
                 {ordersPageCount > 1 && (
                   <Group justify="flex-end" mt="sm">
                     <Pagination
