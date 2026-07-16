@@ -1,5 +1,7 @@
 # Computer Shop UI - https://dxxggszhxub5x.cloudfront.net or msg-computers.com
 
+![CI](https://github.com/MartinSG98/computer_shop_ui/actions/workflows/ci.yml/badge.svg)
+
 React + Vite + TypeScript + Mantine frontend for the Computer Shop. It uses
 react-router for three routes:
 
